@@ -2,9 +2,14 @@ import test from "node:test"
 import assert from "node:assert/strict"
 import { randomUUID } from "node:crypto"
 
+import { getPool, closePool, getPostgresUrl } from "../../db/client"
+getPostgresUrl() // Ensure .env.local is loaded if DATABASE_URL is not set
+
 // Set staging test environment
 process.env.DATABASE_BACKEND = "postgres"
-process.env.DATABASE_URL = process.env.TEST_POSTGRES_URL || "postgresql://learnhub_superadmin:enjay4l@localhost:5432/learnhub_test"
+if (process.env.TEST_POSTGRES_URL) {
+  process.env.DATABASE_URL = process.env.TEST_POSTGRES_URL
+}
 process.env.JWT_SECRET = "staging-verification-jwt-secret-key-32-chars-long"
 process.env.ADMIN_ACCOUNTS_EMAIL = "staging.admin@promptcareacademy.com"
 process.env.ADMIN_ACCOUNTS_PASSWORD = "StagingAdminPass456!"

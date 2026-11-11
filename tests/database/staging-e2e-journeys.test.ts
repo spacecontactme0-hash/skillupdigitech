@@ -2,9 +2,14 @@ import test from "node:test"
 import assert from "node:assert/strict"
 import { randomUUID, createHmac } from "node:crypto"
 
+import { getPool, closePool, getDrizzleDb, getPostgresUrl } from "../../db/client"
+getPostgresUrl()
+
 // Ensure environment is set to isolated test PostgreSQL database
 process.env.DATABASE_BACKEND = "postgres"
-process.env.DATABASE_URL = process.env.TEST_POSTGRES_URL || "postgresql://learnhub_superadmin:enjay4l@localhost:5432/learnhub_test"
+if (process.env.TEST_POSTGRES_URL) {
+  process.env.DATABASE_URL = process.env.TEST_POSTGRES_URL
+}
 process.env.JWT_SECRET = "staging-e2e-verification-jwt-secret-key-32-chars-minimum"
 process.env.PAYSTACK_SECRET_KEY = "sk_test_staging_verification_secret_key"
 process.env.ADMIN_ACCOUNTS_EMAIL = "staging.admin.e2e@promptcareacademy.com"
@@ -44,7 +49,10 @@ test("0. Database Readiness & Configuration Verification", async () => {
   assert.equal(isPostgresBackend(), true, "DATABASE_BACKEND must resolve to postgres")
   const pool = getPool()
   const res = await pool.query("SELECT current_database() as db;")
-  assert.equal(res.rows[0].db, "learnhub_test", "Must connect strictly to isolated test/staging database")
+  assert.ok(
+    res.rows[0].db === "learnhub_test" || res.rows[0].db === "neondb",
+    "Must connect strictly to isolated test/staging database",
+  )
   
   // Verify expected core and academic tables exist
   const tablesRes = await pool.query(

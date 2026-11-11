@@ -1,7 +1,8 @@
 import { Pool } from 'pg'
 
 async function main() {
-  const pool = new Pool({ connectionString: 'postgresql://learnhub_superadmin:enjay4l@localhost:5432/postgres' })
+  const connectionString = process.env.TEST_POSTGRES_ADMIN_URL || 'postgresql://postgres:postgres@localhost:5432/postgres'
+  const pool = new Pool({ connectionString })
   try {
     const res = await pool.query('SELECT datname FROM pg_database;')
     console.log('Databases:', res.rows.map(r => r.datname))
