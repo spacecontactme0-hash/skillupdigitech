@@ -24,14 +24,7 @@ async function loadFromDb(): Promise<CampaignConfig | null> {
     return parsed.success ? parsed.data : null
   }
 
-  if (process.env.DATABASE_BACKEND !== "mongodb" || !process.env.MONGODB_URI) return null
-  const { getCollection } = await import("@/lib/mongodb")
-  const collection = await getCollection<CampaignConfig & { _id: string }>("app_settings")
-  const doc = await collection.findOne({ _id: SETTINGS_DOC_ID })
-  if (!doc) return null
-  const { _id: _unused, ...settings } = doc
-  const parsed = campaignConfigSchema.safeParse({ ...buildDefaultCampaignConfig(), ...settings })
-  return parsed.success ? parsed.data : null
+  return null
 }
 
 async function saveToDb(settings: CampaignConfig): Promise<void> {
@@ -40,11 +33,6 @@ async function saveToDb(settings: CampaignConfig): Promise<void> {
     await pg.setAppSettings(SETTINGS_DOC_ID, settings)
     return
   }
-
-  if (process.env.DATABASE_BACKEND !== "mongodb" || !process.env.MONGODB_URI) return
-  const { getCollection } = await import("@/lib/mongodb")
-  const collection = await getCollection<CampaignConfig & { _id: string }>("app_settings")
-  await collection.updateOne({ _id: SETTINGS_DOC_ID }, { $set: settings }, { upsert: true })
 }
 
 export async function getCampaignConfig(): Promise<CampaignConfig> {

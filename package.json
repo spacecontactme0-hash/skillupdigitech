@@ -18,7 +18,8 @@
         "test:staging-verify": "tsx --test tests/database/staging-runtime-verification.test.ts",
         "test:academic": "tsx --test tests/academic/**/*.test.ts",
         "test:staging-e2e": "tsx --test tests/database/staging-e2e-journeys.test.ts",
-        "test:security": "tsx --test tests/security/**/*.test.ts"
+        "test:security": "tsx --test tests/security/**/*.test.ts",
+        "test:isolation": "tsx --test tests/database/test-db-isolation.test.ts"
     },
     "dependencies": {
         "@emotion/is-prop-valid": "latest",
@@ -65,7 +66,6 @@
         "input-otp": "1.4.1",
         "jsonwebtoken": "^9.0.3",
         "lucide-react": "^0.454.0",
-        "mongodb": "^7.0.0",
         "next": "^16.1.6",
         "next-themes": "^0.4.6",
         "pg": "^8.23.1",

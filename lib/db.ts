@@ -1,23 +1,18 @@
 import { getPostgresDatabase } from "./postgres-db"
 import { getDB as getMockDB } from "./mock-db"
 
-let mongoDbInstance: any = null
-function getMongoDatabase() {
-  if (!mongoDbInstance) {
-    const { getDatabase } = require("./mongodb-db")
-    mongoDbInstance = getDatabase()
-  }
-  return mongoDbInstance
-}
-
 export function isPostgresBackend(): boolean {
   const backend = process.env.DATABASE_BACKEND?.trim()
 
   if (backend) {
     if (backend === "postgres") return true
-    if (backend === "mongodb") return false
+    if (backend === "mongodb") {
+      throw new Error(
+        'DATABASE_BACKEND "mongodb" is deprecated and retired. The application runs exclusively on PostgreSQL.',
+      )
+    }
     throw new Error(
-      `Invalid DATABASE_BACKEND "${backend}". Supported values are "postgres" or "mongodb".`,
+      `Invalid DATABASE_BACKEND "${backend}". Supported value is "postgres".`,
     )
   }
 
@@ -30,7 +25,7 @@ export function isPostgresBackend(): boolean {
 
   if (hasPgUrl && hasMongoUri) {
     throw new Error(
-      "Ambiguous database configuration: both PostgreSQL and MongoDB connection strings are present, but DATABASE_BACKEND is not set. Explicitly set DATABASE_BACKEND=postgres.",
+      "Ambiguous database configuration: MONGODB_URI is obsolete and retired. Explicitly set DATABASE_BACKEND=postgres.",
     )
   }
 
@@ -40,7 +35,7 @@ export function isPostgresBackend(): boolean {
 
   if (hasMongoUri) {
     throw new Error(
-      "MONGODB_URI is present but DATABASE_BACKEND is not set. To prevent unintended fallbacks, explicitly set DATABASE_BACKEND=mongodb for legacy compatibility, or set DATABASE_BACKEND=postgres and provide DATABASE_URL for PostgreSQL.",
+      "MONGODB_URI is present but MongoDB is retired. The application runs exclusively on PostgreSQL. Set DATABASE_BACKEND=postgres and provide DATABASE_URL.",
     )
   }
 
@@ -69,10 +64,7 @@ export function getDB() {
 
   const backend = process.env.DATABASE_BACKEND?.trim()
   if (backend === "mongodb") {
-    if (!process.env.MONGODB_URI) {
-      throw new Error("DATABASE_BACKEND is set to 'mongodb', but MONGODB_URI is missing.")
-    }
-    return getMongoDatabase()
+    throw new Error("DATABASE_BACKEND 'mongodb' is retired. MongoDB is no longer supported.")
   }
 
   if (process.env.NODE_ENV === "production") {

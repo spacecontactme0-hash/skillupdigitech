@@ -24,7 +24,7 @@ test("1. Explicit DATABASE_BACKEND=postgres selects PostgreSQL with DATABASE_URL
   withEnv({
     DATABASE_BACKEND: "postgres",
     DATABASE_URL: "postgresql://user:pass@localhost:5432/testdb",
-    MONGODB_URI: "mongodb://localhost:27017/testdb", // Even if MONGODB_URI is present
+    MONGODB_URI: "mongodb://localhost:27017/testdb", // Even if obsolete MONGODB_URI is present
   }, () => {
     assert.equal(isPostgresBackend(), true)
     const db = getDB()
@@ -53,7 +53,7 @@ test("3. Invalid DATABASE_BACKEND fails closed and throws actionable error", () 
   }, () => {
     assert.throws(
       () => isPostgresBackend(),
-      /Invalid DATABASE_BACKEND "sqlite"\. Supported values are "postgres" or "mongodb"/
+      /Invalid DATABASE_BACKEND "sqlite"/
     )
   })
 })
@@ -66,12 +66,12 @@ test("4. Conflicting config (both PostgreSQL and MongoDB URLs) without DATABASE_
   }, () => {
     assert.throws(
       () => isPostgresBackend(),
-      /Ambiguous database configuration: both PostgreSQL and MongoDB connection strings are present/
+      /Ambiguous database configuration: MONGODB_URI is obsolete and retired/
     )
   })
 })
 
-test("5. Missing DATABASE_BACKEND with only MONGODB_URI fails closed without silently choosing MongoDB", () => {
+test("5. Missing DATABASE_BACKEND with only MONGODB_URI fails closed and indicates MongoDB is retired", () => {
   withEnv({
     DATABASE_BACKEND: undefined,
     DATABASE_URL: undefined,
@@ -81,7 +81,7 @@ test("5. Missing DATABASE_BACKEND with only MONGODB_URI fails closed without sil
   }, () => {
     assert.throws(
       () => isPostgresBackend(),
-      /MONGODB_URI is present but DATABASE_BACKEND is not set/
+      /MONGODB_URI is present but MongoDB is retired/
     )
   })
 })
@@ -101,15 +101,13 @@ test("6. Production requires explicit PostgreSQL configuration", () => {
   })
 })
 
-test("7. Explicit DATABASE_BACKEND=mongodb throws when MONGODB_URI is missing", () => {
+test("7. Explicit DATABASE_BACKEND=mongodb throws deprecation error indicating retirement", () => {
   withEnv({
     DATABASE_BACKEND: "mongodb",
-    MONGODB_URI: undefined,
   }, () => {
-    assert.equal(isPostgresBackend(), false)
     assert.throws(
-      () => getDB(),
-      /DATABASE_BACKEND is set to 'mongodb', but MONGODB_URI is missing/
+      () => isPostgresBackend(),
+      /DATABASE_BACKEND "mongodb" is deprecated and retired/
     )
   })
 })

@@ -1,34 +1,35 @@
 import assert from "node:assert/strict"
-import test, { after, before } from "node:test"
+import test, { describe, after, before } from "node:test"
 import { randomUUID } from "node:crypto"
-
-// Set isolated test database URL before importing db clients
-process.env.DATABASE_BACKEND = "postgres"
-if (process.env.TEST_POSTGRES_URL) {
-  process.env.DATABASE_URL = process.env.TEST_POSTGRES_URL
-}
-
-import { getPool, closePool, getDrizzleDb } from "../../db/client"
-import { getPostgresDatabase } from "../../lib/postgres-db"
-import { isPostgresBackend, getDB } from "../../lib/db"
-import * as schema from "../../db/schema"
-import { sql } from "drizzle-orm"
 import type { PaymentEventType } from "../../lib/types"
+import type { PostgresDatabase } from "../../lib/postgres-db"
+import { getIsolatedTestDbConfig, assertIsolatedTestDatabase } from "../helpers/test-db-isolation"
 
-const db = getPostgresDatabase()
+const testDbConfig = getIsolatedTestDbConfig()
 
-// Track test entities for clean teardown
-const testIdPrefix = `test_${Date.now()}_`
+describe("PostgresDatabase Integration Suite", {
+  skip: !testDbConfig.isConfigured ? testDbConfig.skipReason : false,
+}, () => {
+  const { getPool, closePool, getDrizzleDb } = require("../../db/client")
+  const { getPostgresDatabase } = require("../../lib/postgres-db")
+  const { isPostgresBackend, getDB } = require("../../lib/db")
+  const schema = require("../../db/schema")
+  const { sql } = require("drizzle-orm")
 
-before(async () => {
-  // Ensure connection works
-  const pool = getPool()
-  const res = await pool.query("SELECT current_database() as db;")
-  assert.ok(res.rows[0]?.db, "Tests must run against an active PostgreSQL database")
-})
+  let db: PostgresDatabase
+  // Track test entities for clean teardown
+  const testIdPrefix = `test_${Date.now()}_`
+
+  before(async () => {
+    const pool = getPool()
+    await assertIsolatedTestDatabase(pool)
+    db = getPostgresDatabase()
+  })
 
 after(async () => {
   // Clean up all test data created during the test run
+  const pool = getPool()
+  await assertIsolatedTestDatabase(pool)
   const drizzle = getDrizzleDb()
   await drizzle.execute(sql`DELETE FROM payment_events WHERE payment_id LIKE ${testIdPrefix + "%"} OR reference LIKE ${testIdPrefix + "%"}`)
   await drizzle.execute(sql`DELETE FROM payments WHERE id LIKE ${testIdPrefix + "%"}`)
@@ -59,7 +60,7 @@ test("1. Database connection and schema readiness", async () => {
   const tablesRes = await pool.query(
     "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;",
   )
-  const existingTables = new Set(tablesRes.rows.map((r) => r.table_name))
+  const existingTables = new Set(tablesRes.rows.map((r: any) => r.table_name))
   const expectedTables = [
     "users",
     "pending_registrations",
@@ -602,4 +603,5 @@ test("8. Certificates, Notes, Admin Logs, and App Settings", async () => {
   await db.setAppSettings(settingsKey, { siteName: "Technology Academy Pro", active: false })
   const updatedSettings = await db.getAppSettings<{ siteName: string; active: boolean }>(settingsKey)
   assert.deepEqual(updatedSettings, { siteName: "Technology Academy Pro", active: false })
+})
 })

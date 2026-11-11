@@ -1,40 +1,47 @@
 import assert from "node:assert/strict"
-import test, { after, before } from "node:test"
+import test, { describe, after, before } from "node:test"
 import { randomUUID } from "node:crypto"
 import { NextRequest } from "next/server"
+import { getIsolatedTestDbConfig, assertIsolatedTestDatabase } from "../helpers/test-db-isolation"
 
-const TEST_DB_URL = "postgresql://learnhub_superadmin:enjay4l@localhost:5432/learnhub_test"
-process.env.DATABASE_URL = TEST_DB_URL
-process.env.DATABASE_BACKEND = "postgres"
-process.env.JWT_SECRET = "academic-api-test-jwt-secret-key-32-chars-long"
+const testDbConfig = getIsolatedTestDbConfig()
 
-import { getPool, closePool, getDrizzleDb } from "../../db/client"
-import { getAcademicDb } from "../../lib/academic-db"
-import { getPostgresDatabase } from "../../lib/postgres-db"
-import { generateToken } from "../../lib/auth"
-import { sql } from "drizzle-orm"
+describe("Academic API Integration Suite", {
+  skip: !testDbConfig.isConfigured ? testDbConfig.skipReason : false,
+}, () => {
+  process.env.JWT_SECRET = "academic-api-test-jwt-secret-key-32-chars-long"
 
-import { GET as getQuizAttemptRoute, POST as startQuizAttemptRoute } from "../../app/api/courses/[id]/quizzes/[quizId]/attempt/route"
-import { GET as getAttemptDetailRoute, POST as submitQuizAttemptRoute } from "../../app/api/courses/[id]/quizzes/[quizId]/attempt/[attemptId]/route"
-import { GET as getSubmissionsRoute, POST as createSubmissionRoute } from "../../app/api/courses/[id]/assignments/[assignmentId]/submissions/route"
-import { GET as getGradeRoute, POST as gradeSubmissionRoute } from "../../app/api/courses/[id]/submissions/[submissionId]/grade/route"
-import { GET as getProjectsRoute, POST as createProjectRoute } from "../../app/api/courses/[id]/projects/route"
+  const { getPool, closePool, getDrizzleDb } = require("../../db/client")
+  const { getAcademicDb } = require("../../lib/academic-db")
+  const { getPostgresDatabase } = require("../../lib/postgres-db")
+  const { generateToken } = require("../../lib/auth")
+  const { sql } = require("drizzle-orm")
 
-const db = getPostgresDatabase()
-const academicDb = getAcademicDb()
+  const { GET: getQuizAttemptRoute, POST: startQuizAttemptRoute } = require("../../app/api/courses/[id]/quizzes/[quizId]/attempt/route")
+  const { GET: getAttemptDetailRoute, POST: submitQuizAttemptRoute } = require("../../app/api/courses/[id]/quizzes/[quizId]/attempt/[attemptId]/route")
+  const { GET: getSubmissionsRoute, POST: createSubmissionRoute } = require("../../app/api/courses/[id]/assignments/[assignmentId]/submissions/route")
+  const { GET: getGradeRoute, POST: gradeSubmissionRoute } = require("../../app/api/courses/[id]/submissions/[submissionId]/grade/route")
+  const { GET: getProjectsRoute, POST: createProjectRoute } = require("../../app/api/courses/[id]/projects/route")
 
-const prefix = `api_test_${Date.now()}_`
-let studentId: string
-let instructorId: string
-let studentToken: string
-let instructorToken: string
-let courseId: string
-let quizId: string
-let assignmentId: string
-let attemptId: string
-let submissionId: string
+  let db: any
+  let academicDb: any
 
-before(async () => {
+  const prefix = `api_test_${Date.now()}_`
+  let studentId: string
+  let instructorId: string
+  let studentToken: string
+  let instructorToken: string
+  let courseId: string
+  let quizId: string
+  let assignmentId: string
+  let attemptId: string
+  let submissionId: string
+
+  before(async () => {
+    const pool = getPool()
+    await assertIsolatedTestDatabase(pool)
+    db = getPostgresDatabase()
+    academicDb = getAcademicDb()
   studentId = randomUUID()
   instructorId = randomUUID()
 
@@ -129,6 +136,8 @@ before(async () => {
 })
 
 after(async () => {
+  const pool = getPool()
+  await assertIsolatedTestDatabase(pool)
   const drizzle = getDrizzleDb()
   await drizzle.execute(sql`DELETE FROM grade_history WHERE grade_id IN (SELECT id FROM grades WHERE course_id = ${courseId})`)
   await drizzle.execute(sql`DELETE FROM grades WHERE course_id = ${courseId}`)
@@ -353,4 +362,10 @@ test("API: 8. Capstone project creation and student submission", async () => {
   assert.ok(subData.submission)
   assert.equal(subData.submission.userId, studentId)
   assert.equal(subData.submission.repositoryUrl, "https://github.com/promptcare/student-project")
+})
+
+  after(async () => {
+    const { closePool } = require("../../db/client")
+    await closePool()
+  })
 })

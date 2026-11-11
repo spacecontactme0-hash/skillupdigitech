@@ -45,14 +45,7 @@ async function loadFromDb(): Promise<AdminSettings | null> {
     return parsed.success ? parsed.data : null
   }
 
-  if (process.env.DATABASE_BACKEND !== "mongodb" || !process.env.MONGODB_URI) return null
-  const { getCollection } = await import("@/lib/mongodb")
-  const collection = await getCollection<AdminSettings & { _id: string }>("app_settings")
-  const doc = await collection.findOne({ _id: SETTINGS_DOC_ID })
-  if (!doc) return null
-  const { _id: _unused, ...settings } = doc
-  const parsed = adminSettingsSchema.safeParse(settings)
-  return parsed.success ? parsed.data : null
+  return null
 }
 
 async function saveToDb(settings: AdminSettings): Promise<void> {
@@ -61,15 +54,6 @@ async function saveToDb(settings: AdminSettings): Promise<void> {
     await pg.setAppSettings(SETTINGS_DOC_ID, settings)
     return
   }
-
-  if (process.env.DATABASE_BACKEND !== "mongodb" || !process.env.MONGODB_URI) return
-  const { getCollection } = await import("@/lib/mongodb")
-  const collection = await getCollection<AdminSettings & { _id: string }>("app_settings")
-  await collection.updateOne(
-    { _id: SETTINGS_DOC_ID },
-    { $set: settings },
-    { upsert: true },
-  )
 }
 
 export async function getAdminSettings(): Promise<AdminSettings> {

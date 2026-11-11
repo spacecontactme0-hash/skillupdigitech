@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { sanitizeCourseMutationInput, requireRole, canAccessOwnedResource } from "@/lib/authorization"
-import { getDB } from "@/lib/db"
+import { getDB as getMockDB } from "@/lib/mock-db"
 import { buildFinanceCurrencyRevenue } from "@/lib/analytics/adapters"
 import { runCatalogSeed, STANDARD_TECHNOLOGY_CATEGORIES } from "@/scripts/seed-technology-catalog"
 import type { Payment, Course, User } from "@/lib/types"
@@ -172,7 +172,7 @@ test("Phase 7 Administrator Journey: Course approval validation and category del
   assert.ok(validRejection.rejectionReason.length > 10)
 
   // 3. Category deletion safety rule: cannot delete if mapped courses exist
-  const db = getDB()
+  const db = getMockDB()
   const testCategory = `Cloud Systems ${Date.now()}`
   const createdCat = await db.createCategory(testCategory)
   assert.ok(createdCat.id)

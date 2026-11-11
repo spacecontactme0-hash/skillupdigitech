@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { sanitizeCourseMutationInput } from "@/lib/authorization"
-import { getDB } from "@/lib/db"
+import { getDB as getMockDB } from "@/lib/mock-db"
 import { runCatalogSeed, STANDARD_TECHNOLOGY_CATEGORIES } from "@/scripts/seed-technology-catalog"
 import { buildFinanceCurrencyRevenue } from "@/lib/analytics/adapters"
 import type { Payment } from "@/lib/types"
@@ -53,7 +53,7 @@ test("Phase 6 Security: Administrator is allowed to authorize course approval", 
 })
 
 test("Phase 6 Category Architecture: Category deletion integrity and mock database support", async () => {
-  const db = getDB()
+  const db = getMockDB()
 
   // 1. Create a category
   const testCatName = `DevOps Engineering ${Date.now()}`

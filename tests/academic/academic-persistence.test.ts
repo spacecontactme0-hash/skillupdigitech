@@ -1,33 +1,35 @@
 import assert from "node:assert/strict"
-import test, { after, before } from "node:test"
+import test, { describe, after, before } from "node:test"
 import { randomUUID } from "node:crypto"
+import { getIsolatedTestDbConfig, assertIsolatedTestDatabase } from "../helpers/test-db-isolation"
 
-// Set isolated test database URL before importing db clients
-const TEST_DB_URL = "postgresql://learnhub_superadmin:enjay4l@localhost:5432/learnhub_test"
-process.env.DATABASE_URL = TEST_DB_URL
-process.env.DATABASE_BACKEND = "postgres"
+const testDbConfig = getIsolatedTestDbConfig()
 
-import { getPool, closePool, getDrizzleDb } from "../../db/client"
-import { getAcademicDb } from "../../lib/academic-db"
-import { getPostgresDatabase } from "../../lib/postgres-db"
-import { sql } from "drizzle-orm"
+describe("Academic Persistence Integration Suite", {
+  skip: !testDbConfig.isConfigured ? testDbConfig.skipReason : false,
+}, () => {
+  const { getPool, closePool, getDrizzleDb } = require("../../db/client")
+  const { getAcademicDb } = require("../../lib/academic-db")
+  const { getPostgresDatabase } = require("../../lib/postgres-db")
+  const { sql } = require("drizzle-orm")
 
-const db = getPostgresDatabase()
-const academicDb = getAcademicDb()
+  let db: any
+  let academicDb: any
 
-const testIdPrefix = `acad_${Date.now()}_`
-let studentUserId: string
-let instructorUserId: string
-let categoryId: string
-let courseId: string
-let lessonId: string
-let quizId: string
-let assignmentId: string
+  const testIdPrefix = `acad_${Date.now()}_`
+  let studentUserId: string
+  let instructorUserId: string
+  let categoryId: string
+  let courseId: string
+  let lessonId: string
+  let quizId: string
+  let assignmentId: string
 
-before(async () => {
-  const pool = getPool()
-  const res = await pool.query("SELECT current_database() as db;")
-  assert.equal(res.rows[0].db, "learnhub_test", "Tests must run against isolated learnhub_test database")
+  before(async () => {
+    const pool = getPool()
+    await assertIsolatedTestDatabase(pool)
+    db = getPostgresDatabase()
+    academicDb = getAcademicDb()
 
   // Create test instructor and student users
   studentUserId = randomUUID()
@@ -92,6 +94,8 @@ before(async () => {
 })
 
 after(async () => {
+  const pool = getPool()
+  await assertIsolatedTestDatabase(pool)
   const drizzle = getDrizzleDb()
   // Clean up academic test data in proper foreign key order
   await drizzle.execute(sql`DELETE FROM grade_history WHERE grade_id IN (SELECT id FROM grades WHERE course_id = ${courseId})`)
@@ -129,7 +133,7 @@ test("1. Academic tables schema readiness in PostgreSQL", async () => {
     ORDER BY table_name;
   `)
 
-  const tables = tablesRes.rows.map((r) => r.table_name)
+  const tables = tablesRes.rows.map((r: any) => r.table_name)
   assert.deepEqual(
     tables.sort(),
     [
@@ -534,4 +538,10 @@ test("8. Native PostgreSQL UUID format verification for all academic records", a
     )
     assert.notEqual(row.id.length, 24, "Record ID must NOT be 24 characters (MongoDB ObjectId format)")
   }
+})
+
+  after(async () => {
+    const { closePool } = require("../../db/client")
+    await closePool()
+  })
 })

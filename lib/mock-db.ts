@@ -742,25 +742,10 @@ class MockDatabase {
   }
 }
 
-// Use MongoDB if connection string is available, otherwise use mock
-let dbInstance: MockDatabase | any = null
+// In-memory mock database singleton
+let dbInstance: MockDatabase | null = null
 
-export function getDB() {
-  if (process.env.MONGODB_URI) {
-    // Use MongoDB database
-    try {
-      const { getDatabase } = require('./mongodb-db')
-      return getDatabase()
-    } catch (error) {
-      console.error('Failed to load MongoDB, falling back to mock:', error)
-      // Fall back to mock if MongoDB fails
-      if (!dbInstance) {
-        dbInstance = new MockDatabase()
-      }
-      return dbInstance
-    }
-  }
-  // Use mock database
+export function getDB(): MockDatabase {
   if (!dbInstance) {
     dbInstance = new MockDatabase()
   }

@@ -1,58 +1,66 @@
-import test from "node:test"
+import test, { describe, before, after } from "node:test"
 import assert from "node:assert/strict"
 import { randomUUID, createHmac } from "node:crypto"
+import { getIsolatedTestDbConfig, assertIsolatedTestDatabase } from "../helpers/test-db-isolation"
 
-import { getPool, closePool, getDrizzleDb, getPostgresUrl } from "../../db/client"
-getPostgresUrl()
+const testDbConfig = getIsolatedTestDbConfig()
 
-// Ensure environment is set to isolated test PostgreSQL database
-process.env.DATABASE_BACKEND = "postgres"
-if (process.env.TEST_POSTGRES_URL) {
-  process.env.DATABASE_URL = process.env.TEST_POSTGRES_URL
-}
-process.env.JWT_SECRET = "staging-e2e-verification-jwt-secret-key-32-chars-minimum"
-process.env.PAYSTACK_SECRET_KEY = "sk_test_staging_verification_secret_key"
-process.env.ADMIN_ACCOUNTS_EMAIL = "staging.admin.e2e@promptcareacademy.com"
-process.env.ADMIN_ACCOUNTS_PASSWORD = "StagingE2EAdminPass123!"
+describe("Staging E2E Journeys (PostgreSQL)", {
+  skip: !testDbConfig.isConfigured ? testDbConfig.skipReason : false,
+}, () => {
+  process.env.JWT_SECRET = "staging-e2e-verification-jwt-secret-key-32-chars-minimum"
+  process.env.PAYSTACK_SECRET_KEY = "sk_test_staging_verification_secret_key"
+  process.env.ADMIN_ACCOUNTS_EMAIL = "staging.admin.e2e@promptcareacademy.com"
+  process.env.ADMIN_ACCOUNTS_PASSWORD = "StagingE2EAdminPass123!"
 
-import { isPostgresBackend, getDB } from "../../lib/db"
-import { getPool, closePool, getDrizzleDb } from "../../db/client"
-import { authService, generateToken } from "../../lib/auth"
-import { getAcademicDb } from "../../lib/academic-db"
-import { paystackService } from "../../lib/paystack"
-import { getAdminSettings, updateAdminSettings } from "../../lib/admin-settings"
-import { sql } from "drizzle-orm"
-import jwt from "jsonwebtoken"
-import type { User, Course } from "../../lib/types"
+  const { isPostgresBackend, getDB } = require("../../lib/db")
+  const { getPool, closePool, getDrizzleDb } = require("../../db/client")
+  const { authService, generateToken } = require("../../lib/auth")
+  const { getAcademicDb } = require("../../lib/academic-db")
+  const { paystackService } = require("../../lib/paystack")
+  const { getAdminSettings, updateAdminSettings } = require("../../lib/admin-settings")
+  const { sql } = require("drizzle-orm")
+  const jwt = require("jsonwebtoken")
 
-const academicDb = getAcademicDb()
-const prefix = `e2e_${Date.now()}_`
-const testEntities: {
-  userIds: string[]
-  courseIds: string[]
-  quizIds: string[]
-  assignmentIds: string[]
-  projectIds: string[]
-  paymentIds: string[]
-  enrollmentIds: string[]
-} = {
-  userIds: [],
-  courseIds: [],
-  quizIds: [],
-  assignmentIds: [],
-  projectIds: [],
-  paymentIds: [],
-  enrollmentIds: [],
-}
+  let academicDb: any
+  const prefix = `e2e_${Date.now()}_`
+  const testEntities: {
+    userIds: string[]
+    courseIds: string[]
+    quizIds: string[]
+    assignmentIds: string[]
+    projectIds: string[]
+    paymentIds: string[]
+    enrollmentIds: string[]
+  } = {
+    userIds: [],
+    courseIds: [],
+    quizIds: [],
+    assignmentIds: [],
+    projectIds: [],
+    paymentIds: [],
+    enrollmentIds: [],
+  }
 
-test("0. Database Readiness & Configuration Verification", async () => {
-  assert.equal(isPostgresBackend(), true, "DATABASE_BACKEND must resolve to postgres")
-  const pool = getPool()
-  const res = await pool.query("SELECT current_database() as db;")
-  assert.ok(
-    res.rows[0].db === "learnhub_test" || res.rows[0].db === "neondb",
-    "Must connect strictly to isolated test/staging database",
-  )
+  before(async () => {
+    const pool = getPool()
+    await assertIsolatedTestDatabase(pool)
+    academicDb = getAcademicDb()
+  })
+
+  after(async () => {
+    await closePool()
+  })
+
+  test("0. Database Readiness & Configuration Verification", async () => {
+    assert.equal(isPostgresBackend(), true, "DATABASE_BACKEND must resolve to postgres")
+    const pool = getPool()
+    const res = await pool.query("SELECT current_database() as db;")
+    assert.equal(
+      res.rows[0].db,
+      "learnhub_test",
+      "Must connect strictly to isolated test database 'learnhub_test'",
+    )
   
   // Verify expected core and academic tables exist
   const tablesRes = await pool.query(
@@ -707,6 +715,7 @@ test("5. Resilience & Security: Expired Tokens, Forgery Attempts & Fail-Closed G
 test("99. Cleanup Test Entities from PostgreSQL Test Database", async () => {
   const drizzle = getDrizzleDb()
   const pool = getPool()
+  await assertIsolatedTestDatabase(pool)
 
   // Clean up all test entities created during E2E runs
   await drizzle.execute(sql`DELETE FROM payment_events WHERE reference LIKE ${prefix + "%"} OR reference LIKE 'PC-%'`)
@@ -733,4 +742,5 @@ test("99. Cleanup Test Entities from PostgreSQL Test Database", async () => {
   await pool.query("DELETE FROM users WHERE email = $1", [adminEmail])
 
   await closePool()
+})
 })
