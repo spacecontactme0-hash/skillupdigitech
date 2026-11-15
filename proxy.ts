@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { isValidSessionToken } from "@/lib/auth"
+import { isValidSessionToken } from "@/lib/session-token"
 
 const PROTECTED_PREFIXES = ["/admin", "/dashboard", "/instructor", "/finance", "/checkout"]
 

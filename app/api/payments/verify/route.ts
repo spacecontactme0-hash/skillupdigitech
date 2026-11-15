@@ -6,6 +6,7 @@ import { expirePaymentIfStale, logPaymentEvent } from "@/lib/payments/runtime"
 import { evaluateVerification } from "@/lib/payments/verification"
 import { paystackService } from "@/lib/paystack"
 import { getCurrentUserFromRequest, requireRole } from "@/lib/authorization"
+import { notifyPaymentAndEnrollmentSuccess } from "@/lib/email"
 
 const MAX_VERIFICATION_ATTEMPTS = 5
 
@@ -327,6 +328,17 @@ export async function GET(request: NextRequest) {
       if (payment.paymentType === "onsite_registration") {
         await recordOnsitePaymentOutcome(reference, "completed")
       }
+      await notifyPaymentAndEnrollmentSuccess({
+        db,
+        userId: payment.userId,
+        reference,
+        amount: verification.amount,
+        currency: verification.currency,
+        paymentType: payment.paymentType,
+        courseIds,
+        channel: verification.channel,
+        paidAt: verification.paidAt || new Date(),
+      })
     } else {
       await db.updatePaymentByReference(reference, {
         status: "failed",

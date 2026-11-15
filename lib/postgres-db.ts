@@ -488,6 +488,8 @@ export class PostgresDatabase {
 
     return courseRows.map((c) => ({
       id: c.id,
+      code: c.code ?? undefined,
+      isFoundationCourse: c.isFoundationCourse ?? false,
       title: c.title,
       slug: c.slug,
       description: c.description,

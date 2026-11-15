@@ -38,7 +38,7 @@ export type OnsiteTrainingConfig = z.infer<typeof onsiteTrainingConfigSchema>
 
 export const DEFAULT_ONSITE_TRAINING_CONFIG: OnsiteTrainingConfig = {
   formTitle: "Become a World-Class Certified Caregiver in 21 Days",
-  formDescription: "Join Prompt Care Academy, the elite training arm of Prompt Home Health.",
+  formDescription: "Join SkillUp.",
   durationDays: 21,
   hours: 150,
   registrationFeeNgn: 150000,

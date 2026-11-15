@@ -4,13 +4,10 @@ import type { PendingRegistration, StudentRegistrationProfile, User } from "./ty
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
-import { sendOtpEmail, sendPasswordResetEmail } from "./email"
+import { resolveAppUrl, sendOtpEmail, sendPasswordResetEmail } from "./email"
 
-export interface SessionData {
-  userId: string
-  email: string
-  role: string
-}
+import { getJwtSecret, isValidSessionToken, verifyToken, type SessionData } from "./session-token"
+export { isValidSessionToken, type SessionData }
 
 export type ResendOtpResult =
   | { ok: true }
@@ -31,7 +28,7 @@ type PendingRegistrationResult = {
 
 const JWT_SECRET = process.env.JWT_SECRET?.trim()
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || "7d").trim()
-const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES || 5)
+const OTP_EXPIRES_MINUTES = Number(process.env.OTP_EXPIRES_MINUTES || 10)
 function getAdminAccountEmail(): string | undefined {
   return (process.env.ADMIN_ACCOUNTS_EMAIL || process.env.BOOTSTRAP_ADMIN_EMAIL)?.trim()
 }
@@ -39,18 +36,6 @@ function getAdminAccountPassword(): string | undefined {
   return (process.env.ADMIN_ACCOUNTS_PASSWORD || process.env.BOOTSTRAP_ADMIN_PASSWORD)?.trim()
 }
 
-function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET?.trim()
-
-  if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("JWT_SECRET environment variable is required in production")
-    }
-    throw new Error("JWT_SECRET environment variable is required")
-  }
-
-  return secret
-}
 
 // Password hashing utility
 async function hashPassword(password: string): Promise<string> {
@@ -64,9 +49,7 @@ async function verifyPassword(password: string, hashedPassword: string): Promise
 }
 
 function generateOtpCode(): string {
-  const buffer = crypto.randomBytes(3)
-  const code = (buffer.readUIntBE(0, 3) % 1000000).toString().padStart(6, "0")
-  return code
+  return crypto.randomInt(0, 1000000).toString().padStart(6, "0")
 }
 
 function sanitizePendingRegistration(registration: PendingRegistration): Omit<PendingRegistration, "password" | "otpHash"> {
@@ -87,19 +70,6 @@ export function generateToken(user: User): string {
   return jwt.sign(payload, getJwtSecret(), options)
 }
 
-// Verify JWT token
-function verifyToken(token: string): SessionData | null {
-  try {
-    const decoded = jwt.verify(token, getJwtSecret()) as SessionData
-    return decoded
-  } catch (error) {
-    return null
-  }
-}
-
-export function isValidSessionToken(token: string): boolean {
-  return !!token && !!verifyToken(token)
-}
 
 async function validateUserPassword(user: User, password: string): Promise<boolean> {
   const isHashed = user.password.startsWith("$2a$") || user.password.startsWith("$2b$")
@@ -264,7 +234,17 @@ export const authService = {
     const otpHash = await hashPassword(otp)
     const otpExpiresAt = new Date(Date.now() + OTP_EXPIRES_MINUTES * 60 * 1000)
 
-    await sendOtpEmail({ to: normalizedEmail, name, otp })
+    const emailResult = await sendOtpEmail({ to: normalizedEmail, name, otp })
+    if (!emailResult.success) {
+      throw new Error(emailResult.error || "Unable to send verification OTP email.")
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`\n=======================================================`)
+      console.log(`[DEV OTP] Verification code for ${normalizedEmail}: ${otp}`)
+      console.log(`[DEV OTP] Brevo delivery: ${emailResult.simulated ? "Simulated" : `Sent (ID: ${emailResult.messageId})`}`)
+      console.log(`=======================================================\n`)
+    }
 
     const registrationPayload = {
       email: normalizedEmail,
@@ -381,7 +361,16 @@ export const authService = {
       const otpExpiresAt = new Date(Date.now() + OTP_EXPIRES_MINUTES * 60 * 1000)
 
       try {
-        await sendOtpEmail({ to: normalizedEmail, name: pendingRegistration.name, otp })
+        const emailResult = await sendOtpEmail({ to: normalizedEmail, name: pendingRegistration.name, otp })
+        if (!emailResult.success) {
+          return { ok: false, reason: "email_send_failed" }
+        }
+        if (process.env.NODE_ENV !== "production") {
+          console.log(`\n=======================================================`)
+          console.log(`[DEV OTP] Resent verification code for ${normalizedEmail}: ${otp}`)
+          console.log(`[DEV OTP] Brevo delivery: ${emailResult.simulated ? "Simulated" : `Sent (ID: ${emailResult.messageId})`}`)
+          console.log(`=======================================================\n`)
+        }
         await db.updatePendingRegistration(pendingRegistration.id, { otpHash, otpExpiresAt })
         return { ok: true }
       } catch (error) {
@@ -402,7 +391,16 @@ export const authService = {
 
     await db.updateUser(user.id, { otpHash, otpExpiresAt })
     try {
-      await sendOtpEmail({ to: normalizedEmail, name: user.name, otp })
+      const emailResult = await sendOtpEmail({ to: normalizedEmail, name: user.name, otp })
+      if (!emailResult.success) {
+        return { ok: false, reason: "email_send_failed" }
+      }
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`\n=======================================================`)
+        console.log(`[DEV OTP] Resent verification code for ${normalizedEmail}: ${otp}`)
+        console.log(`[DEV OTP] Brevo delivery: ${emailResult.simulated ? "Simulated" : `Sent (ID: ${emailResult.messageId})`}`)
+        console.log(`=======================================================\n`)
+      }
       return { ok: true }
     } catch (error) {
       console.error("Failed to resend OTP email:", error)
@@ -446,26 +444,21 @@ export const authService = {
       otpExpiresAt: resetTokenExpiresAt,
     })
 
-    // Send reset email
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000'
+    // Send reset email via canonical, production-guarded URL
+    const baseUrl = resolveAppUrl()
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(normalizedEmail)}`
     
     try {
-      await sendPasswordResetEmail({ to: normalizedEmail, name: user.name, resetUrl, token: resetToken })
+      const emailResult = await sendPasswordResetEmail({ to: normalizedEmail, name: user.name, resetUrl, token: resetToken })
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`\n=======================================================`)
+        console.log(`[DEV RESET] Password reset token for ${normalizedEmail}: ${resetToken}`)
+        console.log(`[DEV RESET] Brevo delivery: ${emailResult.simulated ? "Simulated" : `Sent (ID: ${emailResult.messageId})`}`)
+        console.log(`=======================================================\n`)
+      }
     } catch (error) {
       console.error("Failed to send password reset email:", error)
-      // In development, log the reset info
-      if (process.env.NODE_ENV === "development") {
-        console.log("=".repeat(50))
-        console.log("PASSWORD RESET (Email sending failed):")
-        console.log("Email:", email)
-        console.log("Reset URL:", resetUrl)
-        console.log("Reset Code:", resetToken)
-        console.log("=".repeat(50))
-      }
-      // Still return true to not reveal if user exists
+      // Never log sensitive reset tokens or raw reset URLs containing tokens
     }
 
     return true

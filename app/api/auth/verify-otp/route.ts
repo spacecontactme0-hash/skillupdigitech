@@ -63,7 +63,12 @@ export async function POST(request: Request) {
     }
 
     try {
-      await sendWelcomeEmail({ to: result.user.email, name: result.user.name, role: result.user.role })
+      await sendWelcomeEmail({
+        to: result.user.email,
+        name: result.user.name,
+        role: result.user.role,
+        idempotencyKey: `welcome:${result.user.id}:${result.user.role}`,
+      })
     } catch (err) {
       console.error("Failed to send welcome email:", err)
     }

@@ -8,7 +8,7 @@ export interface LogoMarkProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * Geometric SVG Technology Academy Brand Mark
+ * Geometric SVG SkillUp Brand Mark
  * Clean, modern squircle housing terminal chevron, prompt cursor, and network compiler node.
  */
 export function LogoMark({ size = 40, className = "h-10 w-10 shrink-0", ...props }: LogoMarkProps) {
@@ -78,8 +78,17 @@ export function Logo({
 
   // Format brand typography: split first word from remainder for modern visual weight
   const words = resolvedName.split(" ")
-  const firstWord = words[0] || "TECHNOLOGY"
-  const restWords = words.slice(1).join(" ") || "ACADEMY"
+  let firstWord = words[0] || "SKILLUP"
+  let restWords = words.slice(1).join(" ")
+
+  // If single word like "SkillUp", split "Skill" and "Up" for clean dual-tone typography
+  if (!restWords) {
+    const match = resolvedName.match(/^([A-Za-z]+?)(Up)$/i)
+    if (match) {
+      firstWord = match[1]
+      restWords = match[2]
+    }
+  }
 
   const iconElement = (
     <LogoMark
@@ -116,14 +125,24 @@ export function Logo({
       {shouldRenderText ? (
         variant === "compact" ? (
           <span className="text-xs uppercase tracking-wider text-foreground">
-            <span className="font-bold">{firstWord}</span>{" "}
-            <span className="font-medium text-muted-foreground">{restWords}</span>
+            <span className="font-bold">{firstWord}</span>
+            {restWords ? (
+              <>
+                {" "}
+                <span className="font-medium text-muted-foreground">{restWords}</span>
+              </>
+            ) : null}
           </span>
         ) : (
           <span className="flex flex-col leading-tight">
             <span className="text-base sm:text-lg uppercase tracking-wide text-foreground">
-              <span className="font-extrabold">{firstWord}</span>{" "}
-              <span className="font-medium text-muted-foreground">{restWords}</span>
+              <span className="font-extrabold">{firstWord}</span>
+              {restWords ? (
+                <>
+                  {" "}
+                  <span className="font-medium text-muted-foreground">{restWords}</span>
+                </>
+              ) : null}
             </span>
           </span>
         )

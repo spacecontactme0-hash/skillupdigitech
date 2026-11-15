@@ -1,4 +1,4 @@
-// Core type definitions for the Prompt Care Academy platform
+// Core type definitions for the SkillUp platform
 
 export type UserRole = "student" | "instructor" | "admin" | "finance"
 export type StudentGender = "male" | "female" | "other" | "prefer_not_to_say"
@@ -133,6 +133,8 @@ export interface Category {
 
 export interface Course {
   id: string
+  code?: string
+  isFoundationCourse?: boolean
   title: string
   slug: string
   description: string
@@ -203,6 +205,9 @@ export interface Lesson {
     assignmentId?: string
     assignment?: LessonAssignmentDetails
     resources?: LessonAssignmentResource[]
+    moderationCount?: number
+    lastModeratedAt?: string
+    revisionId?: string
   }
   isFree: boolean
   // Approval workflow for individual lessons

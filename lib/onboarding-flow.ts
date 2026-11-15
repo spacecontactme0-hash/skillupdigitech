@@ -47,7 +47,7 @@ export function getOnboardingFeatureFlags(): OnboardingFeatureFlags {
 }
 
 export function getOtpExpiryMinutes(): number {
-  return readNumberValue("OTP_EXPIRES_MINUTES", "NEXT_PUBLIC_OTP_EXPIRES_MINUTES", 15)
+  return readNumberValue("OTP_EXPIRES_MINUTES", "NEXT_PUBLIC_OTP_EXPIRES_MINUTES", 10)
 }
 
 export function getOtpResendCooldownSeconds(): number {

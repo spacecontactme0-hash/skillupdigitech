@@ -7,6 +7,12 @@ import { syncStudentMilestones } from "@/lib/student-milestones"
 import { enrollmentCreateSchema } from "@/lib/validation"
 import { maskCourseForUser } from "@/lib/utils/course-masking"
 import { getCurrentUserFromRequest, resolveAuthorizedUserId, requireRole } from "@/lib/authorization"
+import {
+  sendEnrollmentConfirmationEmail,
+  claimNotificationDispatch,
+  markNotificationSent,
+  markNotificationFailed,
+} from "@/lib/email"
 
 export async function GET(request: NextRequest) {
   try {
@@ -168,6 +174,40 @@ export async function POST(request: NextRequest) {
       const updatedUser = await db.updateUser(authorizedUserId, { enrolledCourses: updatedCourses })
       if (updatedUser?.role === "student") {
         await syncStudentMilestones(db, updatedUser)
+      }
+      try {
+        const course = await db.getCourseById(courseId)
+        if (user.email && course) {
+          const enrollmentKey = `enrollment:${enrollment.id}`
+          const claim = await claimNotificationDispatch({
+            idempotencyKey: enrollmentKey,
+            notificationType: "enrollment_confirmation",
+            recipientEmail: user.email,
+            metadata: { enrollmentId: enrollment.id, courseId, userId: authorizedUserId },
+          })
+          if (claim.claimed) {
+            const sendResult = await sendEnrollmentConfirmationEmail({
+              to: user.email,
+              name: user.name || "Student",
+              courseTitle: course.title,
+              courseSlug: course.slug,
+              trackName: course.category,
+            })
+            if (sendResult.success) {
+              await markNotificationSent(enrollmentKey, {
+                claimToken: claim.claimToken,
+                providerMessageId: sendResult.messageId,
+              })
+            } else {
+              await markNotificationFailed(enrollmentKey, sendResult.error || "Email send failed", {
+                claimToken: claim.claimToken,
+                currentAttempts: claim.record?.attempts,
+              })
+            }
+          }
+        }
+      } catch (emailErr) {
+        console.error("Failed to send direct enrollment confirmation email:", emailErr)
       }
     }
 

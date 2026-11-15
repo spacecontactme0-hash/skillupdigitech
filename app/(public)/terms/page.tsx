@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { SectionShell } from "@/components/skillup/section-shell"
 import { LegalSection } from "@/components/skillup/legal-section"
 import { TOCNav, type TOCSection } from "@/components/skillup/toc-nav"
+import { getAcademyName } from "@/lib/brand-config"
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Prompt Care Academy",
-  description: "Read the Terms of Service for Prompt Care Academy training programs and services.",
+  title: `Terms of Service | ${getAcademyName()}`,
+  description: `Read the Terms of Service for ${getAcademyName()} training programs and services.`,
 }
 
 const sections: TOCSection[] = [
@@ -45,14 +46,14 @@ export default function TermsPage() {
           <article id="legal-content" className="max-w-3xl space-y-4">
             <LegalSection id="introduction" title="1. Introduction">
               <p>
-                Welcome to Prompt Care Academy, a subsidiary of Prompt Home Health. By accessing our website, enrolling in
+                Welcome to SkillUp. By accessing our website, enrolling in
                 our courses, or using our training services, you agree to these Terms of Service.
               </p>
             </LegalSection>
 
             <LegalSection id="eligibility" title="2. Eligibility and Enrollment">
               <p>
-                Our programs are professional vocational courses for individuals aged 18 and above. By enrolling, you
+                Our programs are professional vocational and engineering courses for individuals aged 9 and above. By enrolling, you
                 confirm that your provided information is accurate and complete.
               </p>
             </LegalSection>
@@ -60,7 +61,7 @@ export default function TermsPage() {
             <LegalSection id="intellectual-property" title="3. Intellectual Property Rights">
               <p>
                 All course materials including video lectures, manuals, curriculum outlines, and assessment tools are
-                exclusive intellectual property of Prompt Care Academy.
+                exclusive intellectual property of SkillUp.
               </p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>
@@ -81,7 +82,7 @@ export default function TermsPage() {
             <LegalSection id="certification" title="5. Certification Disclaimer">
               <p>
                 Certification is awarded only after successful completion of all modules and pass-mark requirements.
-                Prompt Care Academy does not guarantee immediate employment.
+                SkillUp does not guarantee immediate employment.
               </p>
             </LegalSection>
           </article>

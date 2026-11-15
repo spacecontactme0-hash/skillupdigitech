@@ -28,6 +28,7 @@ export async function POST(
 
     let changed = false
     let lessonTitle = ""
+    let moderationEventId = ""
     for (const mod of course.modules || []) {
       for (const lesson of mod.lessons || []) {
         if (lesson.id === lessonId) {
@@ -35,6 +36,13 @@ export async function POST(
           lesson.approved = false
           lesson.content = lesson.content || {}
           lesson.content.rejectionNote = note
+          lesson.content.moderationCount = (lesson.content.moderationCount || 0) + 1
+          lesson.content.lastModeratedAt = new Date().toISOString()
+          moderationEventId =
+            body?.moderationId ||
+            body?.revisionId ||
+            lesson.content?.revisionId ||
+            `rev-${lesson.content.moderationCount}`
           lessonTitle = lesson.title
           changed = true
         }
@@ -55,6 +63,7 @@ export async function POST(
           courseTitle: course.title,
           lessonTitle: lessonTitle || "Lesson",
           note,
+          idempotencyKey: `curriculum_review:${id}:${lessonId}:${moderationEventId}`,
         })
       } catch (emailError) {
         console.error("Failed to send lesson rejection email:", emailError)

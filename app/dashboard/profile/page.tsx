@@ -1791,7 +1791,7 @@ export default function ProfilePage() {
           <DialogHeader>
             <DialogTitle>Program Summary</DialogTitle>
             <DialogDescription>
-              Your submitted registration details for Prompt Care Academy.
+              Your submitted registration details for SkillUp.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 px-6 pb-2 text-sm">

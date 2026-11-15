@@ -311,7 +311,7 @@ export default function AdminCategoriesPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2 text-primary font-semibold text-sm">
             <Sparkles className="w-4 h-4" />
-            <span>Standard Technology Academy Disciplines</span>
+            <span>Standard SkillUp Disciplines</span>
           </div>
           <CardDescription className="text-xs">
             Quickly provision recommended technology disciplines if not already in taxonomy.

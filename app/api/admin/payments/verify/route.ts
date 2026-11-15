@@ -7,6 +7,7 @@ import { paystackService } from "@/lib/paystack"
 import { notifyManualReviewAlert } from "@/lib/payment-alerts"
 import { logPaymentEvent } from "@/lib/payments/runtime"
 import { evaluateVerification } from "@/lib/payments/verification"
+import { notifyPaymentAndEnrollmentSuccess } from "@/lib/email"
 
 const verifyActionSchema = z.object({
   reference: z.string().min(3),
@@ -221,6 +222,17 @@ export async function POST(request: Request) {
 
     if (completed) {
       await grantAccessForPayment(db, completed, validated.reference)
+      await notifyPaymentAndEnrollmentSuccess({
+        db,
+        userId: payment.userId,
+        reference: validated.reference,
+        amount: verification.amount,
+        currency: verification.currency,
+        paymentType: payment.paymentType,
+        courseIds: payment.courseIds && payment.courseIds.length > 0 ? payment.courseIds : [payment.courseId],
+        channel: verification.channel,
+        paidAt: verification.paidAt || new Date(),
+      })
     }
     await logPaymentEvent(db, {
       reference: validated.reference,

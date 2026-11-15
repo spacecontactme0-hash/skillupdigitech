@@ -20,20 +20,36 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden - admin only" }, { status: 403 })
     }
 
+    let body: any = {}
+    try {
+      body = await request.json()
+    } catch {
+      // Body may be empty in standard GET-style or empty POST triggers
+    }
+
     const db = getDB()
     const course = await db.getCourseById(id)
     if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 })
 
     let changed = false
     let lessonTitle = ""
+    let moderationEventId = ""
     for (const mod of course.modules || []) {
       for (const lesson of mod.lessons || []) {
         if (lesson.id === lessonId) {
           lesson.pendingApproval = false
           lesson.approved = true
-          if (lesson.content) {
+          lesson.content = lesson.content || {}
+          if (lesson.content.rejectionNote) {
             delete lesson.content.rejectionNote
           }
+          lesson.content.moderationCount = (lesson.content.moderationCount || 0) + 1
+          lesson.content.lastModeratedAt = new Date().toISOString()
+          moderationEventId =
+            body?.moderationId ||
+            body?.revisionId ||
+            lesson.content?.revisionId ||
+            `rev-${lesson.content.moderationCount}`
           lessonTitle = lesson.title
           changed = true
         }
@@ -53,6 +69,7 @@ export async function POST(
           name: instructor.name || "Instructor",
           courseTitle: course.title,
           lessonTitle: lessonTitle || "Lesson",
+          idempotencyKey: `lesson_approved:${id}:${lessonId}:${moderationEventId}`,
         })
       } catch (emailError) {
         console.error("Failed to send lesson approval email:", emailError)

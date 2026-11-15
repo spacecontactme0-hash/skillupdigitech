@@ -18,10 +18,10 @@ export type AdminSettings = {
 const SETTINGS_DOC_ID = "admin_settings"
 
 const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
-  siteName: process.env.NEXT_PUBLIC_APP_NAME?.trim() || "Technology Academy",
+  siteName: process.env.NEXT_PUBLIC_APP_NAME?.trim() || "SkillUp",
   siteDescription: "Practical technology skills and engineering academy",
-  contactEmail: "admissions@techacademy.edu",
-  supportEmail: "support@techacademy.edu",
+  contactEmail: "admissions@skillup-digitech.com.ng",
+  supportEmail: "support@skillup-digitech.com.ng",
   emailNotifications: true,
   courseApproval: false,
   autoEnrollment: true,

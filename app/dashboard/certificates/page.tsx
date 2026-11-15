@@ -6,6 +6,7 @@ import { Award, BookOpen, Download, ExternalLink, ShieldCheck, CheckCircle2, Clo
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { getAcademyName } from "@/lib/brand-config"
 import { useAuthStore } from "@/lib/store"
 import type { Certificate, Enrollment } from "@/lib/types"
 
@@ -86,7 +87,7 @@ export default function CertificatesPage() {
               {loading ? "..." : certificates.length}
             </p>
             <p className="text-xs text-muted-foreground">
-              Issued by Technology Academy
+              Issued by {getAcademyName()}
             </p>
           </div>
 

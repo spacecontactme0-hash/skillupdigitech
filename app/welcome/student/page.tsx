@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { getRoleHomePath } from "@/lib/role-routing"
+import { getAcademyName } from "@/lib/brand-config"
 import { useAuthStore } from "@/lib/store"
 
 type StudentOnboardingState = {
@@ -103,7 +104,7 @@ export default function StudentWelcomePage() {
         <Card className="border-primary/15 shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl">
           <CardHeader className="space-y-4 border-b bg-gradient-to-br from-primary/5 via-background to-accent/5">
             <p className="inline-flex w-fit rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Technology Academy Onboarding
+              {getAcademyName()} Onboarding
             </p>
             <div className="space-y-2">
               <CardTitle className="text-3xl">Welcome to the Academy, {user.name}</CardTitle>

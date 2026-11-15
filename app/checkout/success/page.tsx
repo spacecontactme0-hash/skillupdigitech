@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, Copy, Download, ExternalLink, Loader2, Printer, XCircle } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils/format"
+import { getAcademyName } from "@/lib/brand-config"
 import { useCartStore } from "@/lib/store"
 import { useToast } from "@/hooks/use-toast"
 
@@ -87,7 +88,7 @@ function CheckoutSuccessContent() {
         : "- Course metadata unavailable"
 
     return [
-      "PROMPT CARE ACADEMY - PAYMENT RECEIPT",
+      `${getAcademyName().toUpperCase()} - PAYMENT RECEIPT`,
       "====================================",
       "",
       "APP TRANSACTION DETAILS",
@@ -134,7 +135,7 @@ function CheckoutSuccessContent() {
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement("a")
     anchor.href = url
-    anchor.download = `promptcare-receipt-${payment.reference}.txt`
+    anchor.download = `skillup-receipt-${payment.reference}.txt`
     document.body.appendChild(anchor)
     anchor.click()
     anchor.remove()

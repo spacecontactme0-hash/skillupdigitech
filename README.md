@@ -41,7 +41,7 @@
 - **Auditable Grading & Rubric System:** Instructors grade submissions using custom criterion weights. Any subsequent grade changes automatically record previous vs. new scores, feedback diffs, instructor ID, and change justification in an immutable audit table.
 - **Multi-Currency Commerce & Paystack Integration:** Native support for multi-currency pricing (NGN, USD, EUR, GBP) with Paystack gateway processing, HMAC-SHA512 webhook signature verification, atomic enrollment activation, and duplicate-event idempotency.
 - **Strict Role-Based Access Control (RBAC):** Server-side route handlers, edge proxies, and dashboard shells enforce separation between Student, Instructor, Admin, and Finance roles, preventing privilege escalation.
-- **Email OTP & Password Security:** Transactional onboarding and verification via Resend, time-limited OTP codes, secure bcrypt password hashing (10 salt rounds), and fail-closed JWT session tokens.
+- **Email OTP & Password Security:** Transactional onboarding and verification via Brevo, time-limited OTP codes (10 minutes), secure bcrypt password hashing (10 salt rounds), and fail-closed JWT session tokens.
 - **Verifiable Digital Credentials:** Dynamic certificate generation upon course completion with cryptographically unique verification codes and public verification endpoints.
 
 ---
@@ -136,7 +136,7 @@ erDiagram
 | **State & Forms** | **Zustand 5**, **React Hook Form 7**, **Zod 3.25** validation |
 | **Authentication & AuthZ** | **JWT (jsonwebtoken)**, **bcryptjs** (10 salt rounds), Role-Based Middleware |
 | **Payments** | **Paystack API** (Multi-currency NGN/USD/EUR/GBP, HMAC-SHA512 Webhooks) |
-| **Communications** | **Resend** transactional emails and OTP delivery |
+| **Communications** | **Brevo** transactional emails (@getbrevo/brevo) and OTP delivery |
 | **Analytics & Monitoring** | **@vercel/analytics**, PostgreSQL `admin_logs` and `payment_events` |
 
 ---
@@ -274,14 +274,14 @@ The repository maintains an automated test suite verifying database integrity, s
 
 | Test Suite | Command | Scope |
 | :--- | :--- | :--- |
+| **Transactional Email & Outbox** | `npm run test:email` | Validates Brevo client, dual-token claim fencing, exponential backoff, and idempotent webhook handling. |
 | **Academic Persistence** | `npm run test:academic` | Verifies quiz lifecycle, anti-cheat question masking, server-side scoring, assignment attempts, rubrics, and grade revision history. |
 | **Staging Runtime Verification** | `npm run test:staging-verify` | Confirms strict PostgreSQL execution, zero MongoDB routing, admin bootstrap idempotency, and audit logs. |
 | **End-to-End User Journeys** | `npm run test:staging-e2e` | Simulates full Student, Instructor, Admin, and Payments lifecycle journeys against the database. |
 | **Payments Integration** | `npm run test:payments` | Validates Paystack currency conversions, subunit math, email casing, and manual review triggers. |
 | **Security & RBAC** | `npm run test:security` | Tests password hashing (bcrypt), privilege escalation rejection, and unauthorized route access. |
-| **Type Checking** | `npx tsc --noEmit` | Strict TypeScript compiler validation across the entire codebase. |
-| **Code Linting** | `npm run lint` | ESLint rules for Next.js App Router and React best practices. |
-| **Production Build** | `npm run build` | Next.js production build compiling all 89 App Router routes cleanly. |
+| **Database Isolation** | `npm run test:isolation` | Enforces test isolation guards to prevent any test runs against live databases. |
+| **Production Build** | `npm run build` | Next.js production build compiling all 93 App Router routes cleanly. |
 
 **Current Test Status:** **64 / 64 automated tests passing (100% pass rate).**
 
@@ -299,7 +299,7 @@ DATABASE_URL_UNPOOLED=postgresql://neondb_owner:password@ep-your-endpoint.us-eas
 PG_MAX_POOL_SIZE=10
 
 # Application Branding & URLs
-NEXT_PUBLIC_APP_NAME="SkillUp DigiTech Academy"
+NEXT_PUBLIC_APP_NAME="SkillUp"
 NEXT_PUBLIC_APP_URL="https://skillup-digitech.com.ng"
 
 # Authentication & Security
@@ -319,11 +319,13 @@ PAYSTACK_PUBLIC_KEY=pk_test_your_public_key
 PAYSTACK_BASE_URL=https://api.paystack.co
 NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_your_public_key
 
-# Email & OTP (Resend)
-RESEND_API_KEY=re_your_resend_api_key
-RESEND_FROM=SkillUp DigiTech Academy <no-reply@skillup-digitech.com.ng>
-OTP_EXPIRES_MINUTES=15
-NEXT_PUBLIC_OTP_EXPIRES_MINUTES=15
+# Email & OTP (Brevo)
+BREVO_API_KEY=your_brevo_api_key
+BREVO_SENDER_EMAIL=no-reply@skillup-digitech.com.ng
+BREVO_SENDER_NAME="SkillUp Digitech"
+APP_URL=https://skillup-digitech.com.ng
+OTP_EXPIRES_MINUTES=10
+NEXT_PUBLIC_OTP_EXPIRES_MINUTES=10
 OTP_RESEND_COOLDOWN_SECONDS=60
 NEXT_PUBLIC_OTP_RESEND_COOLDOWN_SECONDS=60
 
@@ -347,7 +349,7 @@ NEXT_PUBLIC_FEATURE_POST_VERIFY_WELCOME=true
 3. **Configure Environment Variables in Vercel**:
    - Set `DATABASE_BACKEND=postgres`
    - Set `DATABASE_URL` (pooled connection string from Neon) and `DATABASE_URL_UNPOOLED`
-   - Set `JWT_SECRET`, `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY`, and remaining keys from `.env.example`.
+   - Set `JWT_SECRET`, `PAYSTACK_SECRET_KEY`, `BREVO_API_KEY`, and remaining keys from `.env.example`.
 4. **Deploy**:
    - Vercel automatically runs `next build` with Turbopack.
 5. **Post-Deployment Checks**:

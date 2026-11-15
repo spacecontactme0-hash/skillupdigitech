@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         to: created.user.email,
         name: created.user.name,
         role: created.user.role,
+        idempotencyKey: `welcome:${created.user.id}:${created.user.role}`,
       })
     } catch (emailError) {
       console.error("Failed to send admin-created user onboarding email:", emailError)

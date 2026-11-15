@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { SectionShell } from "@/components/skillup/section-shell"
 import { LegalSection } from "@/components/skillup/legal-section"
 import { TOCNav, type TOCSection } from "@/components/skillup/toc-nav"
+import { getAcademyName } from "@/lib/brand-config"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Prompt Care Academy",
-  description: "How Prompt Care Academy collects, uses, and protects student data.",
+  title: `Privacy Policy | ${getAcademyName()}`,
+  description: `How ${getAcademyName()} collects, uses, and protects student data.`,
 }
 
 const sections: TOCSection[] = [

@@ -4,6 +4,7 @@ import { paystackService } from "@/lib/paystack"
 import { notifyManualReviewAlert } from "@/lib/payment-alerts"
 import { logPaymentEvent } from "@/lib/payments/runtime"
 import { evaluateVerification } from "@/lib/payments/verification"
+import { notifyPaymentAndEnrollmentSuccess } from "@/lib/email"
 
 export async function POST(request: Request) {
   const rawBody = await request.text()
@@ -236,6 +237,18 @@ export async function POST(request: Request) {
           status: "completed",
           message: "Webhook charge.success processed.",
           metadata: { transactionId, channel },
+        })
+
+        await notifyPaymentAndEnrollmentSuccess({
+          db,
+          userId: currentPayment.userId,
+          reference,
+          amount: amountInMajorUnit,
+          currency,
+          paymentType: currentPayment.paymentType,
+          courseIds,
+          channel,
+          paidAt: paidAt ? new Date(paidAt) : new Date(),
         })
         break
       }

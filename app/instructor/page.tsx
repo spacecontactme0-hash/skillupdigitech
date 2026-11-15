@@ -27,6 +27,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
+import { getAcademyName } from "@/lib/brand-config"
 import type { Course, Enrollment } from "@/lib/types"
 import { RoleAnalyticsCard } from "@/components/skillup/role-analytics-card"
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
@@ -319,7 +320,7 @@ export default function InstructorDashboard() {
           <div className="space-y-4">
             <Badge className="w-fit bg-blue-600 text-white hover:bg-blue-700">
               <Sparkles className="mr-1 h-3.5 w-3.5" />
-              Technology Academy — Engineering Faculty Workspace
+              {getAcademyName()} — Engineering Faculty Workspace
             </Badge>
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -603,7 +604,7 @@ export default function InstructorDashboard() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold tracking-tight">Your Courses</h2>
-            <p className="text-xs text-muted-foreground">Courses you own and maintain on the Technology Academy</p>
+            <p className="text-xs text-muted-foreground">Courses you own and maintain on {getAcademyName()}</p>
           </div>
           <Button variant="outline" size="sm" asChild>
             <Link href="/instructor/courses">View All ({courses.length})</Link>

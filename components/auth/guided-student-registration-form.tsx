@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast"
 import { trackOnboardingEvent } from "@/lib/onboarding-analytics"
 import { clearOnboardingDraft, loadOnboardingDraft, saveOnboardingDraft } from "@/lib/onboarding-draft"
 import { buildVerifyOtpRoute } from "@/lib/onboarding-flow"
+import { getAcademyName } from "@/lib/brand-config"
 import { studentRegisterSchema } from "@/lib/validation"
 
 const PASSWORD_STRENGTH = ["Weak", "Okay", "Strong"] as const
@@ -300,14 +301,31 @@ export function GuidedStudentRegistrationForm() {
         sessionStorage.setItem("pending-otp-email", validated.email)
       }
 
-      router.replace(nextUrl)
-      router.refresh()
+      router.push(nextUrl)
+      // Safety fallback: if client router has not transitioned within 500ms, force window location
+      setTimeout(() => {
+        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/verify-otp")) {
+          window.location.assign(nextUrl)
+        }
+      }, 500)
     } catch (submitError: any) {
       trackOnboardingEvent("signup_submit_failed", {
         role: "student",
         mode: redirectParam === "/dashboard/onsite-training" ? "onsite-intent" : "online",
       })
-      setError(submitError?.issues?.[0]?.message || submitError?.message || "Please review your details and try again")
+      const message = submitError?.issues?.[0]?.message || submitError?.message || "Please review your details and try again"
+      setError(message)
+      toast({
+        title: "Registration incomplete",
+        description: message,
+        variant: "destructive",
+      })
+      if (typeof window !== "undefined") {
+        const topEl = document.getElementById("student-registration-form-top")
+        if (topEl) {
+          topEl.scrollIntoView({ behavior: "smooth" })
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -433,7 +451,7 @@ export function GuidedStudentRegistrationForm() {
     <OnboardingShell
       badge="Student Registration"
       title="Create your student account"
-      description="Join the Technology Academy to build real-world software engineering, cloud, and modern web development skills."
+      description={`Join ${getAcademyName()} to build real-world software engineering, cloud, and modern web development skills.`}
       currentStep={currentStep}
       steps={steps}
       aside={aside}
@@ -443,7 +461,7 @@ export function GuidedStudentRegistrationForm() {
       progressValue={progressValue}
       completedStepIds={completedStepIds}
     >
-      <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-6">
+      <form id="student-registration-form-top" onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-6">
         {draftPrompt ? (
           <Alert className="border-primary/30 bg-primary/5">
             <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -605,11 +623,25 @@ export function GuidedStudentRegistrationForm() {
         {currentStep === 4 ? (
           <div className="space-y-5">
             <OnboardingPreview sections={reviewSections} />
-            <div className="flex items-start gap-2 rounded-2xl border bg-muted/30 p-4">
-              <Checkbox id="acceptTerms" checked={formData.acceptTerms} onCheckedChange={(checked) => setFormData({ ...formData, acceptTerms: checked === true })} />
-              <Label htmlFor="acceptTerms" className="text-sm font-normal leading-relaxed">
-                I agree to the <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
-              </Label>
+            <div className={`flex flex-col gap-2 rounded-2xl border p-4 transition-colors ${!formData.acceptTerms && error ? "border-destructive/60 bg-destructive/5" : "bg-muted/30"}`}>
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="acceptTerms"
+                  checked={formData.acceptTerms}
+                  onCheckedChange={(checked) => {
+                    setFormData({ ...formData, acceptTerms: checked === true })
+                    if (checked) setError("")
+                  }}
+                />
+                <Label htmlFor="acceptTerms" className="text-sm font-normal leading-relaxed cursor-pointer">
+                  I agree to the <Link href="/terms" target="_blank" className="text-primary font-medium hover:underline">Terms of Service</Link> and <Link href="/privacy" target="_blank" className="text-primary font-medium hover:underline">Privacy Policy</Link>.
+                </Label>
+              </div>
+              {!formData.acceptTerms && error && error.toLowerCase().includes("terms") ? (
+                <p className="text-xs font-semibold text-destructive flex items-center gap-1.5 pl-6">
+                  <AlertCircle className="h-3.5 w-3.5" /> Please check the box above to accept the terms before continuing.
+                </p>
+              ) : null}
             </div>
           </div>
         ) : null}

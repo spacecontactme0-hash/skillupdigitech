@@ -3,7 +3,7 @@ import type { TrainingLocation } from "@/lib/types"
 export const ONSITE_TRAINING = {
   formTitle: "Become a World-Class Certified Caregiver in 21 Days",
   formDescription:
-    "Join Prompt Care Academy, the elite training arm of Prompt Home Health.",
+    "Join SkillUp.",
   locations: {
     enugu: {
       label: "Enugu",
