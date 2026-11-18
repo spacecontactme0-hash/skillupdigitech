@@ -17,7 +17,11 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ user, token })
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  } catch (error) {
+    console.error("Auth session verification error (/api/auth/me):", error)
+    return NextResponse.json(
+      { error: "Temporary database connection error while verifying session. Please retry." },
+      { status: 503 },
+    )
   }
 }

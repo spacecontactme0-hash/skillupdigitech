@@ -93,6 +93,10 @@ export interface User {
   bio?: string
   status?: "active" | "suspended"
   emailVerified?: boolean
+  studentCategory?: "adult" | "minor"
+  dateOfBirth?: Date
+  schoolName?: string
+  guardianConsentStatus?: "not_applicable" | "pending" | "verified" | "rejected"
   onboardingState?: UserOnboardingState
   studentMilestones?: StudentMilestone[]
   otpHash?: string
@@ -112,6 +116,14 @@ export interface PendingRegistration {
   role: UserRole
   avatar?: string
   bio?: string
+  studentCategory?: "adult" | "minor"
+  dateOfBirth?: Date
+  schoolName?: string
+  guardianName?: string
+  guardianEmail?: string
+  guardianPhone?: string
+  byolAcknowledged?: boolean
+  registrationDraft?: any
   otpHash: string
   otpExpiresAt: Date
   studentProfile?: StudentRegistrationProfile

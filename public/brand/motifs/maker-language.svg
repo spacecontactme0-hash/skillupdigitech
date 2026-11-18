@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 180" width="300" height="180" fill="none" role="img" aria-label="SkillUp Motif 4: The Maker Language">
+  <rect width="300" height="180" rx="20" fill="#150C33" />
+  <path d="M16 46V16H46" stroke="#9D83DB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M254 16H284V46" stroke="#D6FFF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M16 134V164H46" stroke="#D6FFF6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M254 164H284V134" stroke="#9D83DB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M68 68L48 88L68 108" stroke="#E8E3F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M104 60L84 116" stroke="#D6FFF6" stroke-width="2.6" stroke-linecap="round" />
+  <path d="M120 68L140 88L120 108" stroke="#E8E3F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="164" y="62" width="62" height="10" rx="5" fill="#9D83DB" fill-opacity="0.55" />
+  <rect x="234" y="62" width="24" height="10" rx="5" fill="#D6FFF6" fill-opacity="0.8" />
+  <rect x="164" y="84" width="40" height="10" rx="5" fill="#613399" />
+  <rect x="212" y="84" width="46" height="10" rx="5" fill="#9D83DB" fill-opacity="0.35" />
+  <rect x="164" y="106" width="76" height="10" rx="5" fill="#9D83DB" fill-opacity="0.45" />
+  <rect x="248" y="103" width="8" height="16" rx="2.5" fill="#D6FFF6" />
+</svg>

@@ -43,9 +43,9 @@ export function OnsiteTrainingBanner() {
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Premium Onsite Upgrade</p>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold md:text-2xl">Train in person, practice hands-on, and graduate with guided career support.</h2>
+            <h2 className="text-xl font-semibold md:text-2xl">Join Hybrid Hands-On Practical Labs at our Enugu Learning Centre</h2>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Secure your seat for {DEFAULT_ONSITE_TRAINING_CONFIG.formTitle.toLowerCase()}, pay securely with Paystack, and unlock the premium onsite pathway from inside your student dashboard.
+              Attend in-person coding workshops at 14 Garden Avenue, GRA, Enugu with 100% guaranteed generator power, enterprise fibre Wi-Fi, and 1-on-1 mentor guidance.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">

@@ -17,6 +17,12 @@ import type {
   Rubric,
   RubricCriterion,
   RubricScoreItem,
+  Campus,
+  Classroom,
+  Cohort,
+  ClassSession,
+  SessionBooking,
+  AttendanceRecord,
 } from "./types"
 
 // Helper converters
@@ -133,6 +139,106 @@ function toProjectSubmission(row: typeof schema.projectSubmissions.$inferSelect)
     submittedAt: row.submittedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  }
+}
+
+function toCampus(row: typeof schema.campuses.$inferSelect): Campus {
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    address: row.address,
+    city: row.city,
+    state: row.state,
+    contactPhone: row.contactPhone ?? undefined,
+    contactEmail: row.contactEmail ?? undefined,
+    facilities: (row.facilities as string[]) ?? [],
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }
+}
+
+function toClassroom(row: typeof schema.classrooms.$inferSelect): Classroom {
+  return {
+    id: row.id,
+    campusId: row.campusId,
+    name: row.name,
+    roomNumber: row.roomNumber ?? undefined,
+    safeCapacity: row.safeCapacity,
+    powerOutletsCount: row.powerOutletsCount,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+  }
+}
+
+function toCohort(row: typeof schema.cohorts.$inferSelect): Cohort {
+  return {
+    id: row.id,
+    programmeId: row.programmeId,
+    pathwayId: row.pathwayId ?? undefined,
+    code: row.code,
+    name: row.name,
+    deliveryArrangement: row.deliveryArrangement as Cohort["deliveryArrangement"],
+    campusId: row.campusId ?? undefined,
+    defaultClassroomId: row.defaultClassroomId ?? undefined,
+    maxCapacity: row.maxCapacity,
+    startDate: row.startDate,
+    endDate: row.endDate,
+    status: row.status as Cohort["status"],
+    fixedTimetableSummary: row.fixedTimetableSummary ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }
+}
+
+function toClassSession(row: typeof schema.classSessions.$inferSelect): ClassSession {
+  return {
+    id: row.id,
+    cohortId: row.cohortId,
+    courseId: row.courseId ?? undefined,
+    title: row.title,
+    description: row.description ?? undefined,
+    activityType: row.activityType as ClassSession["activityType"],
+    deliveryChannel: row.deliveryChannel as ClassSession["deliveryChannel"],
+    campusId: row.campusId ?? undefined,
+    classroomId: row.classroomId ?? undefined,
+    instructorId: row.instructorId ?? undefined,
+    sessionDate: row.sessionDate,
+    startTime: row.startTime,
+    endTime: row.endTime,
+    meetingUrl: row.meetingUrl ?? undefined,
+    maxCapacity: row.maxCapacity,
+    bookedSeatsCount: row.bookedSeatsCount,
+    status: row.status as ClassSession["status"],
+    changeReason: row.changeReason ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }
+}
+
+function toSessionBooking(row: typeof schema.sessionBookings.$inferSelect): SessionBooking {
+  return {
+    id: row.id,
+    sessionId: row.sessionId,
+    programmeEnrolmentId: row.programmeEnrolmentId,
+    studentId: row.studentId,
+    status: row.status as SessionBooking["status"],
+    bookedAt: row.bookedAt,
+  }
+}
+
+function toAttendanceRecord(row: typeof schema.attendanceRecords.$inferSelect): AttendanceRecord {
+  return {
+    id: row.id,
+    sessionId: row.sessionId,
+    studentId: row.studentId,
+    programmeEnrolmentId: row.programmeEnrolmentId,
+    attendanceStatus: row.attendanceStatus as AttendanceRecord["attendanceStatus"],
+    attendanceChannel: row.attendanceChannel as AttendanceRecord["attendanceChannel"],
+    verifiedBy: row.verifiedBy ?? undefined,
+    verifiedAt: row.verifiedAt,
+    notes: row.notes ?? undefined,
   }
 }
 
@@ -892,6 +998,555 @@ export class AcademicDatabase {
 
     return row ? toProjectSubmission(row) : undefined
   }
+
+  // ---------------------------------------------------------------------------
+  // Phase 5: Campus, Classroom & Cohort Management
+  // ---------------------------------------------------------------------------
+
+  async getCampuses(): Promise<Campus[]> {
+    const rows = await this.db()
+      .select()
+      .from(schema.campuses)
+      .orderBy(asc(schema.campuses.name))
+
+    return rows.map(toCampus)
+  }
+
+  async getCampusById(id: string): Promise<Campus | undefined> {
+    const [row] = await this.db()
+      .select()
+      .from(schema.campuses)
+      .where(eq(schema.campuses.id, id))
+      .limit(1)
+
+    return row ? toCampus(row) : undefined
+  }
+
+  async createCampus(data: {
+    name: string
+    slug: string
+    address: string
+    city: string
+    state: string
+    contactPhone?: string
+    contactEmail?: string
+    facilities?: string[]
+  }): Promise<Campus> {
+    const id = randomUUID()
+    const now = new Date()
+    const [row] = await this.db()
+      .insert(schema.campuses)
+      .values({
+        id,
+        name: data.name,
+        slug: data.slug,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        contactPhone: data.contactPhone ?? null,
+        contactEmail: data.contactEmail ?? null,
+        facilities: data.facilities ?? ["electricity_backup", "student_wifi", "air_conditioning"],
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+
+    return toCampus(row)
+  }
+
+  async getClassrooms(campusId?: string): Promise<Classroom[]> {
+    const query = this.db().select().from(schema.classrooms)
+    if (campusId) {
+      query.where(eq(schema.classrooms.campusId, campusId))
+    }
+    const rows = await query.orderBy(asc(schema.classrooms.name))
+    return rows.map(toClassroom)
+  }
+
+  async createClassroom(data: {
+    campusId: string
+    name: string
+    roomNumber?: string
+    safeCapacity?: number
+    powerOutletsCount?: number
+  }): Promise<Classroom> {
+    const id = randomUUID()
+    const [row] = await this.db()
+      .insert(schema.classrooms)
+      .values({
+        id,
+        campusId: data.campusId,
+        name: data.name,
+        roomNumber: data.roomNumber ?? null,
+        safeCapacity: data.safeCapacity ?? 30,
+        powerOutletsCount: data.powerOutletsCount ?? 30,
+        isActive: true,
+        createdAt: new Date(),
+      })
+      .returning()
+
+    return toClassroom(row)
+  }
+
+  async getCohorts(filters?: {
+    programmeId?: string
+    pathwayId?: string
+    deliveryArrangement?: string
+    status?: string
+  }): Promise<Cohort[]> {
+    const conditions = []
+    if (filters?.programmeId) {
+      conditions.push(eq(schema.cohorts.programmeId, filters.programmeId))
+    }
+    if (filters?.pathwayId) {
+      conditions.push(eq(schema.cohorts.pathwayId, filters.pathwayId))
+    }
+    if (filters?.deliveryArrangement) {
+      conditions.push(eq(schema.cohorts.deliveryArrangement, filters.deliveryArrangement))
+    }
+    if (filters?.status) {
+      conditions.push(eq(schema.cohorts.status, filters.status))
+    }
+
+    const query = this.db().select().from(schema.cohorts)
+    if (conditions.length > 0) {
+      query.where(and(...conditions))
+    }
+    const rows = await query.orderBy(desc(schema.cohorts.startDate))
+    return rows.map(toCohort)
+  }
+
+  async getCohortById(id: string): Promise<Cohort | undefined> {
+    const [row] = await this.db()
+      .select()
+      .from(schema.cohorts)
+      .where(eq(schema.cohorts.id, id))
+      .limit(1)
+
+    return row ? toCohort(row) : undefined
+  }
+
+  async createCohort(data: {
+    programmeId: string
+    pathwayId?: string
+    code: string
+    name: string
+    deliveryArrangement: "online" | "hybrid"
+    campusId?: string
+    defaultClassroomId?: string
+    maxCapacity?: number
+    startDate: Date
+    endDate: Date
+    status?: string
+    fixedTimetableSummary?: string
+  }): Promise<Cohort> {
+    const id = randomUUID()
+    const now = new Date()
+    const [row] = await this.db()
+      .insert(schema.cohorts)
+      .values({
+        id,
+        programmeId: data.programmeId,
+        pathwayId: data.pathwayId ?? null,
+        code: data.code,
+        name: data.name,
+        deliveryArrangement: data.deliveryArrangement,
+        campusId: data.campusId ?? null,
+        defaultClassroomId: data.defaultClassroomId ?? null,
+        maxCapacity: data.maxCapacity ?? 30,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: data.status ?? "enrolling",
+        fixedTimetableSummary: data.fixedTimetableSummary ?? null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+
+    return toCohort(row)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase 5: Sessions & Atomic Concurrency Booking
+  // ---------------------------------------------------------------------------
+
+  async getClassSessions(filters?: {
+    cohortId?: string
+    courseId?: string
+    instructorId?: string
+    activityType?: string
+  }): Promise<ClassSession[]> {
+    const conditions = []
+    if (filters?.cohortId) {
+      conditions.push(eq(schema.classSessions.cohortId, filters.cohortId))
+    }
+    if (filters?.courseId) {
+      conditions.push(eq(schema.classSessions.courseId, filters.courseId))
+    }
+    if (filters?.instructorId) {
+      conditions.push(eq(schema.classSessions.instructorId, filters.instructorId))
+    }
+    if (filters?.activityType) {
+      conditions.push(eq(schema.classSessions.activityType, filters.activityType))
+    }
+
+    const query = this.db().select().from(schema.classSessions)
+    if (conditions.length > 0) {
+      query.where(and(...conditions))
+    }
+    const rows = await query.orderBy(asc(schema.classSessions.sessionDate), asc(schema.classSessions.startTime))
+    return rows.map(toClassSession)
+  }
+
+  async getClassSessionById(id: string): Promise<ClassSession | undefined> {
+    const [row] = await this.db()
+      .select()
+      .from(schema.classSessions)
+      .where(eq(schema.classSessions.id, id))
+      .limit(1)
+
+    return row ? toClassSession(row) : undefined
+  }
+
+  async createClassSession(data: {
+    cohortId: string
+    courseId?: string
+    title: string
+    description?: string
+    activityType: ClassSession["activityType"]
+    deliveryChannel: ClassSession["deliveryChannel"]
+    campusId?: string
+    classroomId?: string
+    instructorId?: string
+    sessionDate: Date
+    startTime: string
+    endTime: string
+    meetingUrl?: string
+    maxCapacity?: number
+  }): Promise<ClassSession> {
+    const id = randomUUID()
+    const now = new Date()
+    const [row] = await this.db()
+      .insert(schema.classSessions)
+      .values({
+        id,
+        cohortId: data.cohortId,
+        courseId: data.courseId ?? null,
+        title: data.title,
+        description: data.description ?? null,
+        activityType: data.activityType,
+        deliveryChannel: data.deliveryChannel,
+        campusId: data.campusId ?? null,
+        classroomId: data.classroomId ?? null,
+        instructorId: data.instructorId ?? null,
+        sessionDate: data.sessionDate,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        meetingUrl: data.meetingUrl ?? null,
+        maxCapacity: data.maxCapacity ?? 30,
+        bookedSeatsCount: 0,
+        status: "scheduled",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+
+    return toClassSession(row)
+  }
+
+  async updateClassSession(
+    id: string,
+    data: Partial<{
+      title: string
+      description: string
+      sessionDate: Date
+      startTime: string
+      endTime: string
+      meetingUrl: string
+      status: ClassSession["status"]
+      changeReason: string
+      maxCapacity: number
+    }>,
+  ): Promise<ClassSession> {
+    const now = new Date()
+    const patch: any = { updatedAt: now }
+    if (data.title !== undefined) patch.title = data.title
+    if (data.description !== undefined) patch.description = data.description
+    if (data.sessionDate !== undefined) patch.sessionDate = data.sessionDate
+    if (data.startTime !== undefined) patch.startTime = data.startTime
+    if (data.endTime !== undefined) patch.endTime = data.endTime
+    if (data.meetingUrl !== undefined) patch.meetingUrl = data.meetingUrl
+    if (data.status !== undefined) patch.status = data.status
+    if (data.changeReason !== undefined) patch.changeReason = data.changeReason
+    if (data.maxCapacity !== undefined) patch.maxCapacity = data.maxCapacity
+
+    const [row] = await this.db()
+      .update(schema.classSessions)
+      .set(patch)
+      .where(eq(schema.classSessions.id, id))
+      .returning()
+
+    return toClassSession(row)
+  }
+
+  /**
+   * Atomic seat booking using PostgreSQL transaction with SELECT ... FOR UPDATE.
+   * Guarantees capacity safety under high concurrent booking loads.
+   */
+  async bookSessionAtomic(params: {
+    sessionId: string
+    studentId: string
+    programmeEnrolmentId: string
+  }): Promise<SessionBooking> {
+    return await this.db().transaction(async (tx) => {
+      // 1. Lock the session row with SELECT ... FOR UPDATE
+      const [session] = await tx
+        .select()
+        .from(schema.classSessions)
+        .where(eq(schema.classSessions.id, params.sessionId))
+        .for("update")
+
+      if (!session) {
+        throw new Error("SESSION_NOT_FOUND")
+      }
+
+      if (session.status === "cancelled") {
+        throw new Error("SESSION_CANCELLED")
+      }
+
+      // Check current capacity
+      if (session.bookedSeatsCount >= session.maxCapacity) {
+        throw new Error("CAPACITY_EXCEEDED")
+      }
+
+      // Check for existing booking
+      const [existing] = await tx
+        .select()
+        .from(schema.sessionBookings)
+        .where(
+          and(
+            eq(schema.sessionBookings.sessionId, params.sessionId),
+            eq(schema.sessionBookings.studentId, params.studentId),
+          ),
+        )
+
+      if (existing) {
+        if (existing.status === "confirmed") {
+          return toSessionBooking(existing)
+        }
+        // Reactivate cancelled booking
+        const [reactivated] = await tx
+          .update(schema.sessionBookings)
+          .set({ status: "confirmed", bookedAt: new Date() })
+          .where(eq(schema.sessionBookings.id, existing.id))
+          .returning()
+
+        await tx
+          .update(schema.classSessions)
+          .set({
+            bookedSeatsCount: sql`${schema.classSessions.bookedSeatsCount} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(schema.classSessions.id, params.sessionId))
+
+        return toSessionBooking(reactivated)
+      }
+
+      // Increment booked seats count
+      await tx
+        .update(schema.classSessions)
+        .set({
+          bookedSeatsCount: sql`${schema.classSessions.bookedSeatsCount} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.classSessions.id, params.sessionId))
+
+      // Insert new booking
+      const id = randomUUID()
+      const [booking] = await tx
+        .insert(schema.sessionBookings)
+        .values({
+          id,
+          sessionId: params.sessionId,
+          studentId: params.studentId,
+          programmeEnrolmentId: params.programmeEnrolmentId,
+          status: "confirmed",
+          bookedAt: new Date(),
+        })
+        .returning()
+
+      return toSessionBooking(booking)
+    })
+  }
+
+  async cancelSessionBooking(params: { sessionId: string; studentId: string }): Promise<void> {
+    await this.db().transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(schema.sessionBookings)
+        .where(
+          and(
+            eq(schema.sessionBookings.sessionId, params.sessionId),
+            eq(schema.sessionBookings.studentId, params.studentId),
+            eq(schema.sessionBookings.status, "confirmed"),
+          ),
+        )
+
+      if (!existing) return
+
+      await tx
+        .update(schema.sessionBookings)
+        .set({ status: "cancelled" })
+        .where(eq(schema.sessionBookings.id, existing.id))
+
+      await tx
+        .update(schema.classSessions)
+        .set({
+          bookedSeatsCount: sql`GREATEST(0, ${schema.classSessions.bookedSeatsCount} - 1)`,
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.classSessions.id, params.sessionId))
+    })
+  }
+
+  async getSessionBookings(sessionId: string): Promise<SessionBooking[]> {
+    const rows = await this.db()
+      .select()
+      .from(schema.sessionBookings)
+      .where(and(eq(schema.sessionBookings.sessionId, sessionId), eq(schema.sessionBookings.status, "confirmed")))
+
+    return rows.map(toSessionBooking)
+  }
+
+  async getStudentBookings(studentId: string): Promise<SessionBooking[]> {
+    const rows = await this.db()
+      .select()
+      .from(schema.sessionBookings)
+      .where(eq(schema.sessionBookings.studentId, studentId))
+      .orderBy(desc(schema.sessionBookings.bookedAt))
+
+    return rows.map(toSessionBooking)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase 5: Attendance Recording & Compliance Metrics
+  // ---------------------------------------------------------------------------
+
+  async markAttendance(params: {
+    sessionId: string
+    studentId: string
+    programmeEnrolmentId: string
+    attendanceStatus: "present" | "absent" | "excused" | "late"
+    attendanceChannel: "physical" | "virtual"
+    verifiedBy?: string
+    notes?: string
+  }): Promise<AttendanceRecord> {
+    const existing = await this.db()
+      .select()
+      .from(schema.attendanceRecords)
+      .where(
+        and(
+          eq(schema.attendanceRecords.sessionId, params.sessionId),
+          eq(schema.attendanceRecords.studentId, params.studentId),
+        ),
+      )
+      .limit(1)
+
+    const now = new Date()
+
+    if (existing[0]) {
+      const [updated] = await this.db()
+        .update(schema.attendanceRecords)
+        .set({
+          attendanceStatus: params.attendanceStatus,
+          attendanceChannel: params.attendanceChannel,
+          verifiedBy: params.verifiedBy ?? null,
+          verifiedAt: now,
+          notes: params.notes ?? null,
+        })
+        .where(eq(schema.attendanceRecords.id, existing[0].id))
+        .returning()
+
+      return toAttendanceRecord(updated)
+    }
+
+    const id = randomUUID()
+    const [created] = await this.db()
+      .insert(schema.attendanceRecords)
+      .values({
+        id,
+        sessionId: params.sessionId,
+        studentId: params.studentId,
+        programmeEnrolmentId: params.programmeEnrolmentId,
+        attendanceStatus: params.attendanceStatus,
+        attendanceChannel: params.attendanceChannel,
+        verifiedBy: params.verifiedBy ?? null,
+        verifiedAt: now,
+        notes: params.notes ?? null,
+      })
+      .returning()
+
+    return toAttendanceRecord(created)
+  }
+
+  async getAttendanceBySession(sessionId: string): Promise<AttendanceRecord[]> {
+    const rows = await this.db()
+      .select()
+      .from(schema.attendanceRecords)
+      .where(eq(schema.attendanceRecords.sessionId, sessionId))
+
+    return rows.map(toAttendanceRecord)
+  }
+
+  async getStudentAttendanceRecords(
+    studentId: string,
+    programmeEnrolmentId?: string,
+  ): Promise<AttendanceRecord[]> {
+    const conditions = [eq(schema.attendanceRecords.studentId, studentId)]
+    if (programmeEnrolmentId) {
+      conditions.push(eq(schema.attendanceRecords.programmeEnrolmentId, programmeEnrolmentId))
+    }
+
+    const rows = await this.db()
+      .select()
+      .from(schema.attendanceRecords)
+      .where(and(...conditions))
+      .orderBy(desc(schema.attendanceRecords.verifiedAt))
+
+    return rows.map(toAttendanceRecord)
+  }
+
+  async calculateStudentAttendanceStats(
+    studentId: string,
+    programmeEnrolmentId: string,
+  ): Promise<{
+    totalSessions: number
+    attendedSessions: number
+    physicalAttended: number
+    attendancePercentage: number
+  }> {
+    const records = await this.getStudentAttendanceRecords(studentId, programmeEnrolmentId)
+    const totalSessions = records.length
+    const attendedSessions = records.filter(
+      (r) => r.attendanceStatus === "present" || r.attendanceStatus === "late",
+    ).length
+    const physicalAttended = records.filter(
+      (r) =>
+        (r.attendanceStatus === "present" || r.attendanceStatus === "late") &&
+        r.attendanceChannel === "physical",
+    ).length
+    const attendancePercentage =
+      totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 100
+
+    return {
+      totalSessions,
+      attendedSessions,
+      physicalAttended,
+      attendancePercentage,
+    }
+  }
+
 }
 
 let academicDbInstance: AcademicDatabase | null = null

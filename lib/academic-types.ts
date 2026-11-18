@@ -126,3 +126,96 @@ export interface ProjectSubmission {
   createdAt: Date
   updatedAt: Date
 }
+
+// ---------------------------------------------------------------------------
+// Phase 5 Scheduling, Campus & Attendance Types
+// ---------------------------------------------------------------------------
+
+export interface Campus {
+  id: string
+  name: string
+  slug: string
+  address: string
+  city: string
+  state: string
+  contactPhone?: string
+  contactEmail?: string
+  facilities: string[]
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Classroom {
+  id: string
+  campusId: string
+  name: string
+  roomNumber?: string
+  safeCapacity: number
+  powerOutletsCount: number
+  isActive: boolean
+  createdAt: Date
+}
+
+export interface Cohort {
+  id: string
+  programmeId: string
+  pathwayId?: string
+  code: string
+  name: string
+  deliveryArrangement: "online" | "hybrid"
+  campusId?: string
+  defaultClassroomId?: string
+  maxCapacity: number
+  startDate: Date
+  endDate: Date
+  status: "upcoming" | "enrolling" | "active" | "completed" | "archived"
+  fixedTimetableSummary?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ClassSession {
+  id: string
+  cohortId: string
+  courseId?: string
+  title: string
+  description?: string
+  activityType: "live_virtual" | "physical_class" | "physical_practical" | "virtual_workshop"
+  deliveryChannel: "online" | "physical" | "simultaneous_hybrid"
+  campusId?: string
+  classroomId?: string
+  instructorId?: string
+  sessionDate: Date
+  startTime: string
+  endTime: string
+  meetingUrl?: string
+  maxCapacity: number
+  bookedSeatsCount: number
+  status: "scheduled" | "in_progress" | "completed" | "cancelled" | "rescheduled"
+  changeReason?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SessionBooking {
+  id: string
+  sessionId: string
+  programmeEnrolmentId: string
+  studentId: string
+  status: "confirmed" | "cancelled" | "waitlisted"
+  bookedAt: Date
+}
+
+export interface AttendanceRecord {
+  id: string
+  sessionId: string
+  studentId: string
+  programmeEnrolmentId: string
+  attendanceStatus: "present" | "absent" | "excused" | "late"
+  attendanceChannel: "physical" | "virtual"
+  verifiedBy?: string
+  verifiedAt: Date
+  notes?: string
+}
+

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getDB } from "@/lib/db"
 import { authService } from "@/lib/auth"
+import { getTokenFromRequest } from "@/lib/jwt"
 import { categoryUpdateSchema } from "@/lib/validation"
 import { ZodError } from "zod"
 
@@ -10,13 +11,15 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const tokenHeader = request.headers.get("authorization")
-    const token = tokenHeader?.replace("Bearer ", "")
+    const token = getTokenFromRequest(request)
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     const user = await authService.getCurrentUser(token)
-    if (!user || (user.role !== "admin" && user.role !== "instructor")) {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    if (user.role !== "admin" && user.role !== "instructor") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -50,13 +53,15 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const tokenHeader = request.headers.get("authorization")
-    const token = tokenHeader?.replace("Bearer ", "")
+    const token = getTokenFromRequest(request)
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     const user = await authService.getCurrentUser(token)
-    if (!user || user.role !== "admin") {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    if (user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden: Admin privileges required" }, { status: 403 })
     }
 

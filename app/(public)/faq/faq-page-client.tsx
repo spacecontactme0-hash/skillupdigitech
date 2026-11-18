@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SectionShell } from "@/components/skillup/section-shell"
+import { DigitalGridMotif, GrowthPathMotif } from "@/components/brand/motifs"
 import { fadeUp, floating, maskReveal, sectionStagger, useReducedMotionSafe } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 import { getAcademyName } from "@/lib/brand-config"
@@ -219,43 +220,40 @@ export default function FAQPageClient() {
     <div className="pb-12">
       <Script id="faq-jsonld" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      <SectionShell variant="immersive" backgroundType="gradient" hasFloatingAccent className="pb-14">
-        <motion.div variants={sectionStagger} initial="initial" animate="animate" className="mx-auto max-w-3xl space-y-5 text-center">
-          <Badge variant="info" className="mx-auto w-fit rounded-full px-4 py-1 text-xs">
-            <Terminal className="mr-1.5 h-3.5 w-3.5 text-accent" />
+      <section className="relative overflow-hidden bg-skillup-hero py-12 text-white md:py-16">
+        <DigitalGridMotif className="pointer-events-none absolute left-0 top-0 h-56 w-80 text-[#D6FFF6] opacity-25" />
+        <GrowthPathMotif className="pointer-events-none absolute -right-12 bottom-0 h-56 w-96 text-[#B9A6E8] opacity-55" />
+
+        <motion.div variants={sectionStagger} initial="initial" animate="animate" className="container relative z-10 mx-auto max-w-3xl space-y-5 text-center">
+          <Badge variant="mint" className="mx-auto w-fit px-4 py-1 text-xs font-bold">
+            <Terminal className="h-3.5 w-3.5" />
             <span>{academyName} Help Center</span>
           </Badge>
           <div className="overflow-hidden">
-            <motion.h1 variants={maskReveal} className="text-4xl font-extrabold tracking-tight md:text-5xl">
-              Frequently Asked Questions
+            <motion.h1 variants={maskReveal} className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+              Frequently Asked <span className="text-[#D6FFF6]">Questions</span>
             </motion.h1>
           </div>
-          <motion.p variants={fadeUp} className="text-muted-foreground text-base sm:text-lg">
-            Clear, transparent answers on technical curriculum tracks, prerequisites, coding assessments, payments, and certification.
+          <motion.p variants={fadeUp} className="text-sm text-[#E8E3F5]/90 sm:text-base">
+            Clear answers on Teen (13–18) &amp; Adult admissions, BYOL lab standards, fixed timetables, Paystack installments, and verifiable certificates.
           </motion.p>
           <motion.div variants={fadeUp} className="mx-auto w-full max-w-xl pt-2">
             <label htmlFor="faq-search" className="sr-only">
               Search FAQs
             </label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5A5373]" />
               <Input
                 id="faq-search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search topics, prerequisites, or policies..."
-                className="h-11 rounded-2xl border-border/70 bg-card/80 pl-10"
+                placeholder="Search topics, BYOL laptop specs, installments, or certificates..."
+                className="h-12 rounded-2xl border-white/20 bg-white pl-10 text-[#150C33] placeholder:text-[#5A5373]"
               />
             </div>
           </motion.div>
         </motion.div>
-        <motion.div
-          variants={shouldReduceMotion ? undefined : floating}
-          animate={shouldReduceMotion ? undefined : "animate"}
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-12 top-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl"
-        />
-      </SectionShell>
+      </section>
 
       <div className="container mt-8">
         <nav className="sticky top-20 z-20 mb-6 flex gap-2 overflow-x-auto rounded-2xl border border-border/70 bg-background/90 p-2 backdrop-blur">

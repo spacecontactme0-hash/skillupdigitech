@@ -29,6 +29,7 @@ import {
   ArrowLeft,
   Loader2,
   AlertCircle,
+  MessageSquare,
 } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
 import type { Course, Enrollment, Lesson, LearningNote } from "@/lib/types"
@@ -42,6 +43,7 @@ import { QuizRunner } from "@/components/academic/QuizRunner"
 import { AssignmentSubmissionPanel } from "@/components/academic/AssignmentSubmissionPanel"
 import { CapstoneProjectPanel } from "@/components/academic/CapstoneProjectPanel"
 import { TechnicalContentRenderer } from "@/components/learning/TechnicalContentRenderer"
+import { WriteToInstructorModal } from "@/components/student/write-to-instructor-modal"
 
 export default function LearnPage() {
   const params = useParams()
@@ -55,6 +57,7 @@ export default function LearnPage() {
   const [viewMode, setViewMode] = useState<"lesson" | "capstone">("lesson")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeTab, setActiveTab] = useState<"content" | "notes">("content")
+  const [instructorModalOpen, setInstructorModalOpen] = useState(false)
 
   // Notes state
   const [notes, setNotes] = useState<LearningNote[]>([])
@@ -314,6 +317,17 @@ export default function LearnPage() {
             </span>
             <Progress value={enrollment.progress} className="h-2 w-24" />
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setInstructorModalOpen(true)}
+            className="gap-1.5 text-xs text-[#231651] border-[#231651]/20 hover:bg-[#231651]/5"
+            title="Ask instructor a question"
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-[#613399]" />
+            <span className="hidden md:inline">Write to Instructor</span>
+          </Button>
 
           <Button
             variant={viewMode === "capstone" ? "default" : "outline"}
@@ -845,6 +859,13 @@ export default function LearnPage() {
           </aside>
         )}
       </div>
+
+      <WriteToInstructorModal
+        isOpen={instructorModalOpen}
+        onClose={() => setInstructorModalOpen(false)}
+        defaultCourseId={course.id}
+        courseTitle={course.title}
+      />
     </div>
   )
 }

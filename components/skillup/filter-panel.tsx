@@ -39,20 +39,20 @@ export function FilterPanel({
   hasActiveFilters,
 }: FilterPanelProps) {
   return (
-    <Card variant="elevated" className="rounded-3xl border-border/70 py-0">
-      <CardHeader className="border-b border-border/70 py-4">
-        <CardTitle className="text-base">Filter Courses</CardTitle>
+    <Card variant="elevated" className="rounded-3xl border-border bg-card py-0">
+      <CardHeader className="border-b border-border/70 bg-[#F8FAFB] py-4 rounded-t-3xl">
+        <CardTitle className="font-display text-base font-bold text-[#231651]">Filter Courses</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 p-4">
-        <div className="space-y-2">
-          <label htmlFor="course-search" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <CardContent className="space-y-4 p-5">
+        <div className="space-y-1.5">
+          <label htmlFor="course-search-sidebar" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Search
           </label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              id="course-search"
-              placeholder="Search by title..."
+              id="course-search-sidebar"
+              placeholder="Search by title or skill..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-9"
@@ -60,10 +60,12 @@ export function FilterPanel({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Category</label>
+        <div className="space-y-1.5">
+          <label htmlFor="filter-category" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Category
+          </label>
           <Select value={categoryFilter} onValueChange={onCategoryChange}>
-            <SelectTrigger>
+            <SelectTrigger id="filter-category" aria-label="Filter courses by category" className="h-11 w-full rounded-xl">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
@@ -77,10 +79,12 @@ export function FilterPanel({
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Level</label>
+        <div className="space-y-1.5">
+          <label htmlFor="filter-level" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Level
+          </label>
           <Select value={levelFilter} onValueChange={onLevelChange}>
-            <SelectTrigger>
+            <SelectTrigger id="filter-level" aria-label="Filter courses by level" className="h-11 w-full rounded-xl">
               <SelectValue placeholder="All Levels" />
             </SelectTrigger>
             <SelectContent>
@@ -92,10 +96,12 @@ export function FilterPanel({
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sort By</label>
+        <div className="space-y-1.5">
+          <label htmlFor="filter-sort" className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            Sort By
+          </label>
           <Select value={sortBy} onValueChange={onSortChange}>
-            <SelectTrigger>
+            <SelectTrigger id="filter-sort" aria-label="Sort courses" className="h-11 w-full rounded-xl">
               <SelectValue placeholder="Most Popular" />
             </SelectTrigger>
             <SelectContent>
@@ -107,7 +113,7 @@ export function FilterPanel({
           </Select>
         </div>
 
-        <div className="rounded-2xl border border-border/80 bg-muted/30 p-3 text-xs text-muted-foreground">
+        <div className="rounded-2xl border border-border bg-[#F8FAFB] p-3 font-mono text-xs text-muted-foreground">
           Showing {shownCourses} of {totalCourses} courses
         </div>
 

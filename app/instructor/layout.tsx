@@ -3,7 +3,7 @@
 import type React from "react"
 import { useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { BarChart3, BookOpen, ClipboardCheck, Home, Settings, Upload } from "lucide-react"
+import { BarChart3, BookOpen, Calendar, ClipboardCheck, Home, Settings, Upload } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
 import { getRoleHomePath } from "@/lib/role-routing"
 import { clientLogout, makeLogoutGuard } from "@/lib/client-logout"
@@ -14,6 +14,7 @@ const instructorNavItems: DashboardNavItem[] = [
   { name: "Dashboard", href: "/instructor", icon: Home },
   { name: "My Courses", href: "/instructor/courses", icon: BookOpen },
   { name: "Create Course", href: "/instructor/courses/new", icon: Upload },
+  { name: "Attendance & Labs", href: "/instructor/attendance", icon: Calendar },
   { name: "Evaluations", href: "/instructor/evaluations", icon: ClipboardCheck },
   { name: "Analytics", href: "/instructor/analytics", icon: BarChart3 },
   { name: "Settings", href: "/instructor/settings", icon: Settings },

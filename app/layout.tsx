@@ -1,11 +1,29 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AuthSessionBootstrap } from "@/components/auth/auth-session-bootstrap"
 import { Toaster } from "@/components/ui/toaster"
-import { CurrencyModal } from "@/components/ui/currency-modal"
 import { brandConfig } from "@/lib/brand-config"
 import "./globals.css"
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+})
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+})
 
 const metadataBaseUrl =
   process.env.NEXT_PUBLIC_APP_URL ||
@@ -20,16 +38,16 @@ export const metadata: Metadata = {
   description: brandConfig.description,
   icons: {
     icon: [
-      { url: "/tech-academy-icon.svg", type: "image/svg+xml" },
-      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+      { url: "/brand/skillup-favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/brand/skillup-social-avatar.svg", type: "image/svg+xml" }],
   },
   openGraph: {
     title: `${brandConfig.name} — ${brandConfig.tagline}`,
     description: brandConfig.description,
     type: "website",
-    locale: "en_US",
+    locale: "en_NG",
     siteName: brandConfig.name,
   },
   twitter: {
@@ -45,12 +63,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${inter.variable} ${plusJakartaSans.variable} ${jetBrainsMono.variable}`}>
+      <body className="font-sans antialiased bg-background text-foreground selection:bg-[#D6FFF6] selection:text-[#150C33]">
         <AuthSessionBootstrap />
         {children}
         <Toaster />
-        <CurrencyModal />
         <Analytics />
       </body>
     </html>

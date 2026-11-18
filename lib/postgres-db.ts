@@ -38,6 +38,10 @@ function toUser(row: typeof schema.users.$inferSelect): User {
     studentProfile: (row.studentProfile as User["studentProfile"]) ?? undefined,
     instructorProfile: (row.instructorProfile as User["instructorProfile"]) ?? undefined,
     enrolledCourses: (row.enrolledCourses as string[]) ?? [],
+    studentCategory: (row.studentCategory as User["studentCategory"]) ?? "adult",
+    dateOfBirth: row.dateOfBirth ?? undefined,
+    schoolName: row.schoolName ?? undefined,
+    guardianConsentStatus: (row.guardianConsentStatus as User["guardianConsentStatus"]) ?? "not_applicable",
     onboardingState: (row.legacyPayload as any)?.onboardingState ?? undefined,
     studentMilestones: (row.legacyPayload as any)?.studentMilestones ?? undefined,
     createdAt: row.createdAt,
@@ -59,6 +63,14 @@ function toPendingRegistration(row: typeof schema.pendingRegistrations.$inferSel
     otpExpiresAt: row.otpExpiresAt,
     studentProfile: (row.studentProfile as PendingRegistration["studentProfile"]) ?? undefined,
     instructorProfile: (row.instructorProfile as PendingRegistration["instructorProfile"]) ?? undefined,
+    studentCategory: (row.studentCategory as PendingRegistration["studentCategory"]) ?? "adult",
+    dateOfBirth: row.dateOfBirth ?? undefined,
+    schoolName: row.schoolName ?? undefined,
+    guardianName: row.guardianName ?? undefined,
+    guardianEmail: row.guardianEmail ?? undefined,
+    guardianPhone: row.guardianPhone ?? undefined,
+    byolAcknowledged: row.byolAcknowledged ?? false,
+    registrationDraft: row.registrationDraft ?? undefined,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   }
@@ -230,6 +242,10 @@ export class PostgresDatabase {
         otpExpiresAt: user.otpExpiresAt ?? null,
         studentProfile: user.studentProfile ?? null,
         instructorProfile: user.instructorProfile ?? null,
+        studentCategory: (user as any).studentCategory ?? "adult",
+        dateOfBirth: (user as any).dateOfBirth ?? null,
+        schoolName: (user as any).schoolName ?? null,
+        guardianConsentStatus: (user as any).guardianConsentStatus ?? "not_applicable",
         enrolledCourses: user.enrolledCourses ?? [],
         legacyPayload: Object.keys(legacyPayload).length ? legacyPayload : null,
         createdAt: now,
@@ -260,6 +276,10 @@ export class PostgresDatabase {
     if (updates.otpExpiresAt !== undefined) patch.otpExpiresAt = updates.otpExpiresAt
     if (updates.studentProfile !== undefined) patch.studentProfile = updates.studentProfile
     if (updates.instructorProfile !== undefined) patch.instructorProfile = updates.instructorProfile
+    if ((updates as any).studentCategory !== undefined) patch.studentCategory = (updates as any).studentCategory
+    if ((updates as any).dateOfBirth !== undefined) patch.dateOfBirth = (updates as any).dateOfBirth
+    if ((updates as any).schoolName !== undefined) patch.schoolName = (updates as any).schoolName
+    if ((updates as any).guardianConsentStatus !== undefined) patch.guardianConsentStatus = (updates as any).guardianConsentStatus
     if (updates.enrolledCourses !== undefined) patch.enrolledCourses = updates.enrolledCourses
 
     if (updates.onboardingState !== undefined || updates.studentMilestones !== undefined) {
@@ -336,6 +356,14 @@ export class PostgresDatabase {
         otpExpiresAt: registration.otpExpiresAt,
         studentProfile: registration.studentProfile ?? null,
         instructorProfile: registration.instructorProfile ?? null,
+        studentCategory: (registration as any).studentCategory ?? "adult",
+        dateOfBirth: (registration as any).dateOfBirth ?? null,
+        schoolName: (registration as any).schoolName ?? null,
+        guardianName: (registration as any).guardianName ?? null,
+        guardianEmail: (registration as any).guardianEmail ?? null,
+        guardianPhone: (registration as any).guardianPhone ?? null,
+        byolAcknowledged: (registration as any).byolAcknowledged ?? false,
+        registrationDraft: (registration as any).registrationDraft ?? null,
         createdAt: now,
         updatedAt: now,
       })
@@ -361,6 +389,14 @@ export class PostgresDatabase {
     if (updates.otpExpiresAt !== undefined) patch.otpExpiresAt = updates.otpExpiresAt
     if (updates.studentProfile !== undefined) patch.studentProfile = updates.studentProfile
     if (updates.instructorProfile !== undefined) patch.instructorProfile = updates.instructorProfile
+    if ((updates as any).studentCategory !== undefined) patch.studentCategory = (updates as any).studentCategory
+    if ((updates as any).dateOfBirth !== undefined) patch.dateOfBirth = (updates as any).dateOfBirth
+    if ((updates as any).schoolName !== undefined) patch.schoolName = (updates as any).schoolName
+    if ((updates as any).guardianName !== undefined) patch.guardianName = (updates as any).guardianName
+    if ((updates as any).guardianEmail !== undefined) patch.guardianEmail = (updates as any).guardianEmail
+    if ((updates as any).guardianPhone !== undefined) patch.guardianPhone = (updates as any).guardianPhone
+    if ((updates as any).byolAcknowledged !== undefined) patch.byolAcknowledged = (updates as any).byolAcknowledged
+    if ((updates as any).registrationDraft !== undefined) patch.registrationDraft = (updates as any).registrationDraft
 
     const [row] = await this.db()
       .update(schema.pendingRegistrations)

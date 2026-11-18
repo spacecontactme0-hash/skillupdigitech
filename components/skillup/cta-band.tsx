@@ -1,9 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { motion, useReducedMotion } from "framer-motion"
-import { ArrowRight, Code2 } from "lucide-react"
+import { ArrowRight, Sparkles } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useGetStartedDrawer } from "@/components/layout/get-started-drawer"
+import { DigitalGridMotif, GrowthPathMotif } from "@/components/brand/motifs"
 
 interface CtaBandProps {
   title: string
@@ -13,67 +15,50 @@ interface CtaBandProps {
 }
 
 export function CtaBand({ title, description, imageUrl, backgroundImageUrl }: CtaBandProps) {
-  const reducedMotion = useReducedMotion()
+  const { openDrawer } = useGetStartedDrawer()
 
   return (
-    <section className="relative overflow-hidden rounded-[24px] border border-border/80 bg-gradient-to-br from-[#090D16] via-[#0D1527] to-[#0A192F] p-6 text-white shadow-lifted md:p-12">
+    <section className="relative overflow-hidden rounded-3xl border border-white/15 bg-skillup-hero p-7 text-white shadow-[var(--shadow-lifted)] md:p-12">
       {backgroundImageUrl || imageUrl ? (
         <img
           src={backgroundImageUrl || imageUrl}
-          alt="Technology education environment"
-          className="absolute inset-0 h-full w-full object-cover opacity-20"
+          alt="SkillUp Digitech Academy learners"
+          className="absolute inset-0 h-full w-full object-cover opacity-15"
           loading="lazy"
           decoding="async"
         />
-      ) : (
-        <div className="pointer-events-none absolute inset-0 opacity-10 [background-image:linear-gradient(to_right,#3b82f6_1px,transparent_1px),linear-gradient(to_bottom,#3b82f6_1px,transparent_1px)] [background-size:32px_32px]" />
-      )}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(37,99,235,0.28)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(2,132,199,0.22)_0%,transparent_50%)]" />
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-14 -top-10 h-64 w-64 rounded-full bg-primary/20 blur-3xl"
-        animate={reducedMotion ? undefined : { scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={reducedMotion ? undefined : { duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-      />
+      ) : null}
 
-      <div className="relative z-[1]">
-        <div className="space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-3.5 py-1 text-xs font-medium text-sky-300">
-            <Code2 className="h-3.5 w-3.5" />
-            <span>Accelerate Your Technical Career</span>
-          </div>
+      <DigitalGridMotif className="pointer-events-none absolute left-0 top-0 h-56 w-80 text-[#D6FFF6] opacity-25" />
+      <GrowthPathMotif className="pointer-events-none absolute -right-8 bottom-0 h-64 w-[440px] text-[#B9A6E8] opacity-65" />
 
-          <h2 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">{title}</h2>
-          <p className="max-w-2xl text-base text-slate-300 sm:text-lg">{description}</p>
+      <div className="relative z-10 max-w-2xl space-y-5">
+        <Badge variant="mint" className="text-xs font-bold">
+          <Sparkles className="h-3.5 w-3.5" />
+          Next Cohort Admissions Open
+        </Badge>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-            <Button
-              size="lg"
-              className="h-12 rounded-xl bg-primary px-6 font-semibold text-white shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-[1.02] hover:bg-primary/90"
-              asChild
-            >
-              <Link href="/courses">
-                Explore Courses
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-12 rounded-xl border-slate-700 bg-slate-900/60 px-6 font-medium text-slate-200 transition-all duration-200 hover:scale-[1.02] hover:bg-slate-800"
-              asChild
-            >
-              <Link href="/register">Create Free Account</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="ghost"
-              className="h-12 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white"
-              asChild
-            >
-              <Link href="/contact">Speak to an Advisor</Link>
-            </Button>
-          </div>
+        <h2 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl">
+          {title}
+        </h2>
+        <p className="text-sm leading-relaxed text-[#E8E3F5]/90 sm:text-base">{description}</p>
+
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+          <Button size="lg" variant="mint" onClick={openDrawer} className="h-12 px-7">
+            Get Started
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button size="lg" variant="outline-dark" asChild className="h-12 px-6">
+            <Link href="/courses">Explore Courses</Link>
+          </Button>
+          <Button
+            size="lg"
+            variant="ghost"
+            asChild
+            className="h-12 text-[#E8E3F5] hover:bg-white/10 hover:text-white"
+          >
+            <Link href="/contact">Visit Enugu Centre</Link>
+          </Button>
         </div>
       </div>
     </section>

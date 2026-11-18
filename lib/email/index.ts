@@ -38,6 +38,14 @@ import { renderEnrollmentConfirmationEmail } from "./templates/enrollment-confir
 import { renderPaymentConfirmationEmail } from "./templates/payment-confirmation"
 import { renderLessonApprovedEmail, renderLessonRejectedEmail } from "./templates/curriculum-review"
 import { renderPaymentManualReviewAlertEmail } from "./templates/payment-alert"
+import {
+  renderGuardianConsentEmail,
+  GuardianConsentEmailParams,
+} from "./templates/guardian-consent"
+import {
+  renderInstallmentReminderEmail,
+  InstallmentReminderEmailParams,
+} from "./templates/installment-reminder"
 
 /**
  * Internal helper to dispatch transactional emails with optional durable idempotency.
@@ -263,4 +271,63 @@ export async function sendPaymentManualReviewAlert(params: PaymentManualReviewAl
       }),
   })
 }
+
+/**
+ * Dispatches an official parental / guardian consent request for minor learners (aged 13-17).
+ */
+export async function sendGuardianConsentEmail(
+  params: GuardianConsentEmailParams & { idempotencyKey?: string },
+) {
+  const { subject, html, text } = renderGuardianConsentEmail(params)
+  const alertKey = params.idempotencyKey || `guardian_consent:${params.consentToken}`
+
+  return dispatchWithOptionalIdempotency({
+    idempotencyKey: alertKey,
+    notificationType: "guardian_consent_request",
+    recipientEmail: params.guardianEmail,
+    metadata: {
+      studentName: params.studentName,
+      programmeName: params.programmeName,
+      pathwayOrCourseName: params.pathwayOrCourseName,
+    },
+    send: () =>
+      sendTransactionalEmail({
+        to: { email: params.guardianEmail, name: params.guardianName },
+        subject,
+        html,
+        text,
+        tags: ["safeguarding", "guardian-consent"],
+      }),
+  })
+}
+
+/**
+ * Dispatches an automated tuition installment reminder via Brevo.
+ */
+export async function sendInstallmentReminderEmail(
+  params: InstallmentReminderEmailParams & { idempotencyKey?: string },
+) {
+  const { subject, html, text } = renderInstallmentReminderEmail(params)
+  const alertKey = params.idempotencyKey || `installment_reminder:${params.studentEmail}:${params.dueDate}`
+
+  return dispatchWithOptionalIdempotency({
+    idempotencyKey: alertKey,
+    notificationType: "installment_reminder",
+    recipientEmail: params.studentEmail,
+    metadata: {
+      programmeName: params.programmeName,
+      installmentAmountNgn: params.installmentAmountNgn,
+      isOverdue: params.isOverdue,
+    },
+    send: () =>
+      sendTransactionalEmail({
+        to: { email: params.studentEmail, name: params.studentName },
+        subject,
+        html,
+        text,
+        tags: ["finance", "installment-reminder"],
+      }),
+  })
+}
+
 

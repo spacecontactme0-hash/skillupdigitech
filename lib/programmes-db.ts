@@ -340,6 +340,90 @@ export const programmesDb = {
   },
 
   /**
+   * Create a programme enrolment for a student
+   */
+  async createProgrammeEnrolment(data: {
+    studentId: string
+    programmeId: string
+    pathwayId?: string | null
+    deliveryArrangement: string
+    cohortId?: string | null
+    byolAcknowledged?: boolean
+    status?: string
+    metadata?: Record<string, any>
+  }) {
+    const db = getDrizzleDb()
+    const id = crypto.randomUUID()
+    const now = new Date()
+
+    const [row] = await db
+      .insert(schema.programmeEnrolments)
+      .values({
+        id,
+        studentId: data.studentId,
+        programmeId: data.programmeId,
+        pathwayId: data.pathwayId || null,
+        deliveryArrangement: data.deliveryArrangement,
+        cohortId: data.cohortId || null,
+        byolAcknowledged: data.byolAcknowledged ?? false,
+        byolAcknowledgedAt: data.byolAcknowledged ? now : null,
+        status: data.status || "pending_payment",
+        metadata: data.metadata || {},
+        enrolledAt: now,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning()
+
+    // If cohort is assigned, also record cohort membership
+    if (data.cohortId) {
+      await db
+        .insert(schema.cohortMemberships)
+        .values({
+          id: crypto.randomUUID(),
+          cohortId: data.cohortId,
+          programmeEnrolmentId: id,
+          studentId: data.studentId,
+          status: "active",
+          joinedAt: now,
+        })
+        .onConflictDoNothing()
+    }
+
+    return row
+  },
+
+  /**
+   * Record a policy or BYOL legal acknowledgement
+   */
+  async recordPolicyAcknowledgement(data: {
+    userId: string
+    programmeEnrolmentId?: string | null
+    policyType: string
+    policyVersion?: string
+    ipAddress?: string
+    userAgent?: string
+    metadata?: Record<string, any>
+  }) {
+    const db = getDrizzleDb()
+    const [row] = await db
+      .insert(schema.policyAcknowledgements)
+      .values({
+        id: crypto.randomUUID(),
+        userId: data.userId,
+        programmeEnrolmentId: data.programmeEnrolmentId || null,
+        policyType: data.policyType,
+        policyVersion: data.policyVersion || "v1.0",
+        ipAddress: data.ipAddress || null,
+        userAgent: data.userAgent || null,
+        metadata: data.metadata || {},
+        acknowledgedAt: new Date(),
+      })
+      .returning()
+    return row
+  },
+
+  /**
    * Get all active programme enrolments for a student
    */
   async getStudentProgrammeEnrolments(studentId: string) {
@@ -366,5 +450,24 @@ export const programmesDb = {
       )
       .where(eq(schema.programmeEnrolments.studentId, studentId))
       .orderBy(desc(schema.programmeEnrolments.createdAt))
+  },
+
+  /**
+   * Get scheduled class sessions for a cohort
+   */
+  async getCohortClassSessions(cohortId: string) {
+    const db = getDrizzleDb()
+    return db
+      .select({
+        session: schema.classSessions,
+        classroom: schema.classrooms,
+      })
+      .from(schema.classSessions)
+      .leftJoin(
+        schema.classrooms,
+        eq(schema.classSessions.classroomId, schema.classrooms.id),
+      )
+      .where(eq(schema.classSessions.cohortId, cohortId))
+      .orderBy(asc(schema.classSessions.sessionDate))
   },
 }

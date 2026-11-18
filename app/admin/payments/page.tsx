@@ -220,14 +220,22 @@ export default function AdminPaymentsPage() {
         </Link>
       </div>
 
-      <div className="mb-6">
-        <div className="mb-3 flex justify-end">
-          <Button asChild variant="outline">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[#231651]">Payment Management</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Review transaction histories, manage student installments, and handle refunds</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button asChild className="bg-[#231651] hover:bg-[#150C33] text-white text-xs">
+            <Link href="/admin/payments/installments">
+              <CreditCard className="w-3.5 h-3.5 mr-1.5" />
+              Tuition Installments
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="text-xs">
             <Link href="/admin/payments/verify">Manual Verify</Link>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold">Payment Management</h1>
-        <p className="text-muted-foreground mt-2">Review payments, manage refunds, and monitor status</p>
       </div>
 
       <div className="mb-6">

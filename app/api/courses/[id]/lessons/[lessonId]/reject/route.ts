@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { authService } from "@/lib/auth"
+import { getTokenFromRequest } from "@/lib/jwt"
 import { getDB } from "@/lib/db"
 import { sendLessonRejectedEmail } from "@/lib/email"
 
@@ -13,12 +14,14 @@ export async function POST(
     const body = await request.json()
     const note = (body.note || "").toString()
 
-    const authHeader = (request.headers.get("authorization") || "")
-    const token = authHeader.replace("Bearer ", "")
+    const token = getTokenFromRequest(request)
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
     const user = await authService.getCurrentUser(token)
-    if (!user || user.role !== "admin") {
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    if (user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden - admin only" }, { status: 403 })
     }
 

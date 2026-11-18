@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getDB } from "@/lib/db"
 import { authService } from "@/lib/auth"
+import { getTokenFromRequest } from "@/lib/jwt"
 import { maskCourseForUser } from "@/lib/utils/course-masking"
 
 export async function GET(
@@ -16,8 +17,7 @@ export async function GET(
       return NextResponse.json({ error: "Course not found" }, { status: 404 })
     }
 
-    const authHeader = request.headers.get("authorization")
-    const token = authHeader?.replace("Bearer ", "")
+    const token = getTokenFromRequest(request)
     const user = token ? await authService.getCurrentUser(token) : null
 
     if (course.approved !== true && (!user || user.role === "student")) {

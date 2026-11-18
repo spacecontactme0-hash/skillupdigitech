@@ -39,7 +39,7 @@ export function getPool(): Pool {
       connectionString,
       max: Number(process.env.PG_MAX_POOL_SIZE || 20),
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: Number(process.env.PG_CONNECTION_TIMEOUT_MS || 20000),
     })
 
     poolInstance.on("error", (err) => {

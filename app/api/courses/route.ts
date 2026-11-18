@@ -3,6 +3,7 @@ import { ZodError } from "zod"
 import { getDB } from "@/lib/db"
 import { courseCreateSchema } from "@/lib/validation"
 import { authService } from "@/lib/auth"
+import { getTokenFromRequest } from "@/lib/jwt"
 import { getCurrentUserFromRequest, sanitizeCourseMutationInput } from "@/lib/authorization"
 import { maskCourseForUser } from "@/lib/utils/course-masking"
 
@@ -55,8 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Mask video URLs for unauthenticated/non-privileged users
-    const authHeader = request.headers.get("authorization")
-    const token = authHeader?.replace("Bearer ", "")
+    const token = getTokenFromRequest(request)
     let user = null
     if (token) {
       user = await authService.getCurrentUser(token)

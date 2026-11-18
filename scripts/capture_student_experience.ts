@@ -86,8 +86,8 @@ async function main() {
     await page.waitForTimeout(3000);
     await page.screenshot({ path: path.join(outDir, '08_student_welcome.png'), fullPage: false });
     console.log("Saved 08_student_welcome.png");
-  } catch (err) {
-    console.error("Error capturing /welcome/student:", err.message);
+  } catch (err: any) {
+    console.error("Error capturing /welcome/student:", err?.message || err);
   }
 
   // Capture dashboard
@@ -97,8 +97,8 @@ async function main() {
     await page.waitForTimeout(3000);
     await page.screenshot({ path: path.join(outDir, '09_student_dashboard.png'), fullPage: false });
     console.log("Saved 09_student_dashboard.png");
-  } catch (err) {
-    console.error("Error capturing /dashboard:", err.message);
+  } catch (err: any) {
+    console.error("Error capturing /dashboard:", err?.message || err);
   }
 
   // Capture clean home without currency modal
@@ -108,8 +108,8 @@ async function main() {
     await page.waitForTimeout(2000);
     await page.screenshot({ path: path.join(outDir, '01_clean_home.png'), fullPage: false });
     console.log("Saved 01_clean_home.png");
-  } catch (err) {
-    console.error("Error capturing clean home:", err.message);
+  } catch (err: any) {
+    console.error("Error capturing clean home:", err?.message || err);
   }
 
   // Capture clean courses without currency modal
@@ -119,8 +119,8 @@ async function main() {
     await page.waitForTimeout(2000);
     await page.screenshot({ path: path.join(outDir, '02_clean_courses.png'), fullPage: false });
     console.log("Saved 02_clean_courses.png");
-  } catch (err) {
-    console.error("Error capturing clean courses:", err.message);
+  } catch (err: any) {
+    console.error("Error capturing clean courses:", err?.message || err);
   }
 
   await browser.close();
@@ -128,7 +128,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err: any) => {
   console.error("Fatal:", err);
   process.exit(1);
 });

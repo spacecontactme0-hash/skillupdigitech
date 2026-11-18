@@ -235,6 +235,14 @@ export default function VerifyOtpClient() {
     }
   }
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6)
+    if (pasted) {
+      setOtp(pasted)
+    }
+  }
+
   const handleChangeEmail = () => {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("pending-otp-email")
@@ -293,7 +301,17 @@ export default function VerifyOtpClient() {
 
               <div className="space-y-2">
                 <Label htmlFor="otp">Verification Code</Label>
-                <Input id="otp" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} />
+                <Input
+                  id="otp"
+                  placeholder="••••••"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onPaste={handlePaste}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  className="text-center font-mono text-2xl font-bold tracking-[0.4em] h-14 rounded-xl border-2 border-primary/20"
+                />
               </div>
 
               <Button type="submit" className="w-full" disabled={loading || otp.length !== 6}>
@@ -359,16 +377,23 @@ export default function VerifyOtpClient() {
 
           <form onSubmit={handleVerify} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="otp">Verification Code</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="otp" className="text-sm font-semibold text-foreground">
+                  6-Digit Verification Code
+                </Label>
+                <span className="text-xs text-muted-foreground">Numbers only</span>
+              </div>
               <Input
                 id="otp"
                 autoFocus
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                placeholder="123456"
+                placeholder="••••••"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onPaste={handlePaste}
                 maxLength={6}
+                className="text-center font-mono text-2xl sm:text-3xl font-bold tracking-[0.4em] sm:tracking-[0.5em] h-14 sm:h-16 rounded-2xl border-2 border-primary/20 focus-visible:border-primary focus-visible:ring-primary/20 bg-background"
               />
             </div>
 

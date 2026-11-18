@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" role="img" aria-label="SkillUp Growth Mark">
+  <defs>
+    <linearGradient id="skillup-bg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2D1B69" />
+      <stop offset="55%" stop-color="#231651" />
+      <stop offset="100%" stop-color="#150C33" />
+    </linearGradient>
+    <linearGradient id="skillup-step-mid" x1="16" y1="36" x2="48" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B9A6E8" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+  </defs>
+  <!-- Squircle container -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#skillup-bg)" />
+  <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="15.25" stroke="#613399" stroke-opacity="0.55" stroke-width="1.5" />
+
+  <!-- Subtle upward digital grid accent -->
+  <path d="M16 48L48 16" stroke="#613399" stroke-opacity="0.28" stroke-width="1.5" stroke-linecap="round" />
+
+  <!-- Modular Ascending S: Foundation Block (Bottom) -->
+  <rect x="14" y="41" width="26" height="8.5" rx="4.25" fill="#9D83DB" />
+  <!-- Ascending Connector Node (Lower-Right to Center) -->
+  <path d="M35 41L41.5 34.5C43.2 32.8 42 29.8 39.6 29.8H24.4C22 29.8 20.8 26.8 22.5 25.1L29 18.6" stroke="url(#skillup-step-mid)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Upper Summit Bar -->
+  <rect x="24" y="14.5" width="20" height="8.5" rx="4.25" fill="#FFFFFF" />
+  <!-- Luminous Mint Apex Growth Node -->
+  <circle cx="48.5" cy="18.75" r="5" fill="#D6FFF6" />
+  <circle cx="48.5" cy="18.75" r="2.1" fill="#0A5C4A" />
+</svg>

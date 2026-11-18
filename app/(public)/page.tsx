@@ -1,26 +1,90 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { ArrowRight, CheckCircle2, Code2, GitBranch, Layers, Star, Terminal } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ClipboardCheck,
+  Laptop,
+  ShieldCheck,
+  Sparkles,
+  Wifi,
+  Zap,
+} from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Testimonials } from "@/components/testimonials"
+import { Button } from "@/components/ui/button"
 import { SectionShell } from "@/components/skillup/section-shell"
 import { SkillupHero } from "@/components/skillup/hero"
-import { fadeUp, sectionStagger } from "@/components/skillup/motion-presets"
-import { useEffect, useState } from "react"
-import type { Course } from "@/lib/types"
-import { formatCurrency } from "@/lib/utils/format"
-import { usePreferencesStore } from "@/lib/store"
+import { DualPathwaysSection } from "@/components/skillup/dual-pathways-section"
+import { CourseCard } from "@/components/skillup/course-card"
 import { CtaBand } from "@/components/skillup/cta-band"
-import { getAcademyName } from "@/lib/brand-config"
+import {
+  DigitalGridMotif,
+  GrowthPathMotif,
+  MakerLanguageMotif,
+  MotifLoadingState,
+  MotifSectionDivider,
+} from "@/components/brand/motifs"
+import { usePreferencesStore } from "@/lib/store"
+import type { Course } from "@/lib/types"
+
+const HOW_IT_WORKS_STEPS = [
+  {
+    step: "01",
+    tag: "Pathway Selection",
+    title: "Choose Your Learning Track",
+    text: "Select Career Readiness (Hybrid Enugu + Online) or modular Skill Acquisition (100% Online) tailored for teens (13–18) or adults.",
+  },
+  {
+    step: "02",
+    tag: "Guided Mastery",
+    title: "Learn Online & In-Centre",
+    text: "Follow structured video lessons, weekly live virtual sessions, and physical lab workshops with uninterrupted power and fibre.",
+  },
+  {
+    step: "03",
+    tag: "Applied Craft",
+    title: "Build Projects & Capstone",
+    text: "Submit practical assignments and a final capstone deliverable graded against clear, published instructor rubrics.",
+  },
+  {
+    step: "04",
+    tag: "Verified Proof",
+    title: "Earn a Verifiable Certificate",
+    text: "Meet graduation clearance criteria to unlock a cryptographically verifiable SkillUp credential anyone can validate at /verify.",
+  },
+]
+
+const HIGH_INTENT_FAQS = [
+  {
+    q: "Can teenagers aged 13–18 enroll at SkillUp Digitech Academy?",
+    a: "Yes. Secondary school students aged 13–18 are warmly welcomed across our Skill Acquisition and foundational tracks. During onboarding, teen learners provide parent/guardian contact details so we can send an instant digital Guardian Consent approval link before active cohort sessions begin.",
+  },
+  {
+    q: "What laptop specifications do I need for the Enugu Learning Centre (BYOL)?",
+    a: "Physical hybrid cohorts operate on a mandatory Bring Your Own Laptop (BYOL) standard so learners build directly in their own development environment. We recommend at least an Intel Core i5 / Ryzen 5 (or Apple M-series), 8GB RAM, and 256GB SSD. SkillUp provides dedicated studio desks, 100% solar + generator power, and high-speed fibre internet.",
+  },
+  {
+    q: "How do hybrid cohort timetables work?",
+    a: "Career Readiness cohorts follow fixed, academy-published timetables (for example, midweek live virtual classes combined with scheduled Enugu physical lab days). Fixed scheduling keeps cohort peers, lab seat capacity, and instructors synchronized.",
+  },
+  {
+    q: "Are Basic AI 101 and Basic Digital Literacy really free?",
+    a: "Yes. Every paid enrolment in either the Career Readiness Programme or Skill Acquisition Programme automatically unlocks Basic AI 101 (AI-101) and Basic Digital Literacy (BDL-101) at zero extra tuition cost.",
+  },
+  {
+    q: "Can I pay my tuition in installments?",
+    a: "Yes. Eligible programmes support both single-payment and structured installment plans powered securely via Paystack, with transparent receipt tracking inside your student dashboard.",
+  },
+]
 
 export default function HomePage() {
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([])
+  const [loadingCourses, setLoadingCourses] = useState(true)
   const { currency } = usePreferencesStore()
-  const academyName = getAcademyName()
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -31,232 +95,244 @@ export default function HomePage() {
       } catch (error) {
         console.error("Failed to load courses:", error)
         setFeaturedCourses([])
+      } finally {
+        setLoadingCourses(false)
       }
     }
     void loadCourses()
   }, [])
 
-  const features = [
-    {
-      title: "Hands-On Software Labs",
-      description: "Learn by writing, debugging, and testing functional code in every unit.",
-      icon: Terminal,
-    },
-    {
-      title: "Structured Engineering Paths",
-      description: "Follow curated syllabi from foundational syntax to distributed architectures.",
-      icon: Layers,
-    },
-    {
-      title: "Portfolio Capstone Projects",
-      description: "Graduate with deployable repositories and verified demonstration of skills.",
-      icon: CheckCircle2,
-    },
-  ]
-
-  const technicalCompetencies = [
-    "Full-Stack Web Development",
-    "PostgreSQL & Data Modeling",
-    "Cloud Architecture & CI/CD",
-    "TypeScript & React 19",
-    "REST & GraphQL Services",
-    "System Design & Scalability",
-    "Automated Testing Suites",
-    "Clean Code & Refactoring",
-  ]
-
-  const learningSteps = [
-    {
-      step: 1,
-      title: "Master the Core Fundamentals",
-      text: "Establish rock-solid programming foundations in data structures, algorithms, and clean syntax.",
-      tag: "Foundations",
-    },
-    {
-      step: 2,
-      title: "Construct Realistic Applications",
-      text: "Develop end-to-end full-stack projects with modern frameworks, relational databases, and secure APIs.",
-      tag: "Applied Engineering",
-    },
-    {
-      step: 3,
-      title: "Automate Testing & Code Quality",
-      text: "Enforce type safety, write comprehensive unit and integration tests, and build CI/CD pipelines.",
-      tag: "Quality & Reliability",
-    },
-    {
-      step: 4,
-      title: "Deliver a Capstone Portfolio",
-      text: "Publish production-ready repositories evaluated against comprehensive academic grading rubrics.",
-      tag: "Proof of Skill",
-    },
-  ]
-
   return (
     <div className="flex flex-col">
+      {/* SECTION 1 — HERO */}
       <SkillupHero featuredCourses={featuredCourses} currency={currency} />
 
-      <SectionShell className="py-8 md:py-10" variant="split">
-        <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/70">
-          <div className="marquee-track flex gap-3 p-4 md:p-5">
-            {[...technicalCompetencies, ...technicalCompetencies].map((item, index) => (
-              <span
-                key={`${item}-${index}`}
-                className="inline-flex whitespace-nowrap rounded-full border border-border/80 bg-background/70 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors duration-200 hover:border-accent/50 hover:text-accent"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </SectionShell>
+      {/* SECTION 2 — DUAL ACADEMIC PATHWAYS */}
+      <DualPathwaysSection className="py-12 md:py-16" />
 
-      <SectionShell className="bg-muted/30" variant="split" hasParallax hasFloatingAccent divider="wave">
-        <motion.div
-          variants={sectionStagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="space-y-10"
-        >
-          <motion.div variants={fadeUp()} className="max-w-2xl space-y-3">
-            <Badge variant="secondary" className="rounded-full px-3 py-1">
-              Why Choose {academyName}?
+      <MotifSectionDivider variant="growth" />
+
+      {/* SECTION 3 — HOW SKILLUP WORKS (MERGED 4-STEP PROGRESSION) */}
+      <SectionShell variant="split" className="relative py-12 md:py-16" id="how-it-works">
+        <GrowthPathMotif className="pointer-events-none absolute -right-12 top-6 hidden h-64 w-[420px] text-[#613399] opacity-20 lg:block" />
+
+        <div className="relative space-y-8">
+          <div className="max-w-2xl space-y-3">
+            <Badge variant="lavender">
+              <Sparkles className="h-3.5 w-3.5 text-[#613399]" />
+              How SkillUp Works
             </Badge>
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">A learning environment designed for real progress</h2>
-            <p className="text-muted-foreground">
-              Every lesson is structured to move you from theoretical syntax to practical execution with transparent rubrics and instructor feedback.
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-[#231651] md:text-4xl">
+              From First Lesson to Verified Tech Portfolio
+            </h2>
+            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+              One clear, milestone-driven path from foundations to rubric-evaluated projects—no passive video
+              playlists or guesswork.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {features.map((feature, index) => (
-              <motion.div key={feature.title} variants={fadeUp(0.06 * index)}>
-                <Card variant="elevated" interactive className="h-full border-border/80 bg-card/80 transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lifted">
-                  <CardContent className="space-y-4 p-6">
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent">
-                      <feature.icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-xl font-semibold">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {HOW_IT_WORKS_STEPS.map((item) => (
+              <article
+                key={item.step}
+                className="group relative flex flex-col justify-between rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] transition-all duration-200 hover:-translate-y-1 hover:border-[#613399]/50 hover:shadow-[var(--shadow-lifted)]"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#231651] font-mono text-xs font-bold text-[#D6FFF6]">
+                      {item.step}
+                    </span>
+                    <Badge variant="lavender" className="text-[10px]">
+                      {item.tag}
+                    </Badge>
+                  </div>
+                  <h3 className="font-display text-base font-bold text-[#231651]">{item.title}</h3>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{item.text}</p>
+                </div>
+
+                <div className="mt-5 flex items-center gap-1.5 border-t border-border/70 pt-3 text-[11px] font-semibold text-[#0A5C4A]">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Structured Cohort Standard</span>
+                </div>
+              </article>
             ))}
           </div>
-        </motion.div>
-      </SectionShell>
-
-      <SectionShell variant="immersive" className="pb-12 pt-10 md:pt-14" id="learning-path">
-        <motion.div variants={fadeUp()} initial="hidden" whileInView="visible" viewport={{ once: true }} className="space-y-3">
-          <Badge variant="secondary" className="rounded-full px-3 py-1">
-            The Engineering Journey
-          </Badge>
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">How you grow from beginner to autonomous developer</h2>
-          <p className="max-w-2xl text-muted-foreground">
-            A milestone-based progression that guarantees verifiable skill demonstration at every level.
-          </p>
-        </motion.div>
-
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {learningSteps.map((step, index) => (
-            <motion.article
-              key={step.title}
-              variants={fadeUp(0.06 * index)}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="group relative flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-6 shadow-soft transition-all duration-200 hover:-translate-y-1 hover:border-accent/50 hover:shadow-lifted"
-            >
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-accent">
-                    Step 0{step.step}
-                  </span>
-                  <Badge variant="outline" className="text-[11px] font-normal">
-                    {step.tag}
-                  </Badge>
-                </div>
-                <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{step.text}</p>
-              </div>
-
-              <div className="mt-5 border-t border-border/60 pt-3 flex items-center gap-1.5 text-xs text-primary font-medium">
-                <Code2 className="h-3.5 w-3.5" />
-                <span>Verified Milestones</span>
-              </div>
-            </motion.article>
-          ))}
         </div>
       </SectionShell>
 
-      <SectionShell>
-        <div className="mb-10 flex items-end justify-between gap-4">
+      <MotifSectionDivider variant="grid" />
+
+      {/* SECTION 4 — FEATURED COURSES (LIVE POSTGRESQL CATALOG) */}
+      <SectionShell variant="split" className="py-12 md:py-16">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Featured Courses</h2>
-            <p className="text-muted-foreground">Start building immediately with our most popular technical tracks</p>
+            <Badge variant="lavender">Live Course Catalog</Badge>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-[#231651] md:text-4xl">
+              Featured Programmes &amp; Courses
+            </h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Transparent NGN tuition with 2 complimentary foundation courses included on every paid track.
+            </p>
           </div>
           <Button variant="outline" asChild>
             <Link href="/courses">
-              View All Courses
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Browse Full Catalog
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {featuredCourses.map((course, index) => (
-            <motion.div
-              key={course.id}
-              variants={fadeUp(0.05 * index)}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              <Link href={`/courses/${course.slug}`}>
-                <Card
-                  variant="elevated"
-                  interactive
-                  className="h-full overflow-hidden border-border/70 bg-card/80 transition-all duration-200 hover:-translate-y-1 hover:border-accent/50 hover:shadow-lifted"
-                >
-                  <div className="relative aspect-video overflow-hidden bg-muted">
-                    <img
-                      src={course.thumbnail || "/web-development-course.png"}
-                      alt={course.title}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.04]"
-                      loading="lazy"
-                    />
-                    <Badge className="absolute left-4 top-4">{course.level}</Badge>
-                  </div>
-                  <CardContent className="space-y-4 p-6">
-                    <Badge variant="outline">{course.category}</Badge>
-                    <h3 className="line-clamp-2 text-lg font-semibold">{course.title}</h3>
-                    <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
+        {loadingCourses ? (
+          <MotifLoadingState label="Loading live academy courses..." />
+        ) : (
+          <div className="grid gap-6 md:grid-cols-3">
+            {featuredCourses.map((course) => (
+              <CourseCard key={course.id} course={course} currency={currency} />
+            ))}
+          </div>
+        )}
+      </SectionShell>
 
-                    <div className="flex items-center justify-between border-t border-border/70 pt-4">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                        <span className="font-medium">{course.rating.toFixed(1)}</span>
-                        <span className="text-muted-foreground">({course.enrollmentCount})</span>
-                      </div>
-                      <div className="text-lg font-bold text-primary">{formatCurrency(course.price[currency], currency)}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
-          ))}
+      <MotifSectionDivider variant="maker" />
+
+      {/* SECTION 5 — ENUGU LEARNING ENVIRONMENT & INSTITUTIONAL CREDIBILITY */}
+      <SectionShell variant="split" className="relative bg-[#F3EFFA]/55 py-12 md:py-16">
+        <DigitalGridMotif className="pointer-events-none absolute left-0 top-0 h-56 w-80 text-[#231651] opacity-30" />
+
+        <div className="relative grid items-center gap-8 lg:grid-cols-12">
+          <div className="space-y-5 lg:col-span-5">
+            <Badge variant="mint">Enugu Main Learning Centre</Badge>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-[#231651]">
+              A Real Campus Built for Focused Practical Work
+            </h2>
+            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Located at <strong>14 Garden Avenue, GRA, Enugu</strong>, our physical centre features dedicated coding
+              studios—<strong>Lab 1 (Turing Room)</strong> and <strong>Lab 2 (Lovelace Room)</strong>—capped at 30
+              learners per room for hands-on instructor attention.
+            </p>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-card p-3.5 text-xs">
+                <div className="flex items-center gap-2 font-bold text-[#231651]">
+                  <Zap className="h-4 w-4 text-[#0A5C4A]" />
+                  100% Power Uptime
+                </div>
+                <p className="mt-1 text-muted-foreground">Solar + standby generator guarantee during every lab.</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-3.5 text-xs">
+                <div className="flex items-center gap-2 font-bold text-[#231651]">
+                  <Wifi className="h-4 w-4 text-[#613399]" />
+                  Enterprise Fibre
+                </div>
+                <p className="mt-1 text-muted-foreground">High-speed broadband for Git, cloud deploys &amp; AI tools.</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-3.5 text-xs">
+                <div className="flex items-center gap-2 font-bold text-[#231651]">
+                  <Laptop className="h-4 w-4 text-[#231651]" />
+                  BYOL Standard
+                </div>
+                <p className="mt-1 text-muted-foreground">Learners bring personal laptops to keep work portable.</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-card p-3.5 text-xs">
+                <div className="flex items-center gap-2 font-bold text-[#231651]">
+                  <ClipboardCheck className="h-4 w-4 text-[#0A5C4A]" />
+                  Public Verification
+                </div>
+                <p className="mt-1 text-muted-foreground">Every graduate credential is verifiable at /verify.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-1">
+              <Button variant="cta" asChild>
+                <Link href="/verify">
+                  <ShieldCheck className="h-4 w-4" />
+                  Verify a Credential
+                </Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/contact">
+                  <Building2 className="h-4 w-4" />
+                  Visit Enugu Centre
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Curated Campus, Mentor & Capstone Photo Collage */}
+          <div className="relative grid grid-cols-12 gap-3.5 lg:col-span-7">
+            <MakerLanguageMotif className="pointer-events-none absolute -bottom-4 -right-4 hidden h-24 w-40 text-[#613399] opacity-35 sm:block" />
+
+            <div className="col-span-12 overflow-hidden rounded-3xl border border-border bg-card shadow-[var(--shadow-soft)]">
+              <img
+                src="/images/campus/enugu-coding-lab.jpg"
+                alt="SkillUp Digitech Academy Enugu Learning Centre computer lab"
+                className="aspect-[16/9] w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="col-span-6 overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+              <img
+                src="/images/instructors/female-instructor-mentoring.jpg"
+                alt="SkillUp instructor mentoring a learner 1-on-1"
+                className="aspect-[16/10] w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="col-span-6 overflow-hidden rounded-2xl border border-border bg-card shadow-xs">
+              <img
+                src="/images/projects/student-capstone-demo.jpg"
+                alt="SkillUp learner presenting a capstone project to peers"
+                className="aspect-[16/10] w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
         </div>
       </SectionShell>
 
-      <Testimonials />
+      {/* SECTION 6 — COMPACT HIGH-INTENT FAQ */}
+      <SectionShell variant="split" className="py-12 md:py-16">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <div className="space-y-2 text-center">
+            <Badge variant="lavender">Admissions &amp; Practical Questions</Badge>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-[#231651]">
+              Quick Answers Before You Apply
+            </h2>
+          </div>
 
-      <SectionShell variant="immersive" className="pt-8 md:pt-12">
+          <Accordion type="single" collapsible className="space-y-3">
+            {HIGH_INTENT_FAQS.map((item, idx) => (
+              <AccordionItem
+                key={item.q}
+                value={`faq-${idx}`}
+                className="rounded-2xl border border-border bg-card px-5 shadow-xs"
+              >
+                <AccordionTrigger className="py-4 text-left font-display text-sm font-bold text-[#231651] hover:no-underline sm:text-base">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="pb-4 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          <div className="pt-1 text-center">
+            <Button variant="outline" asChild>
+              <Link href="/faq">
+                View All Frequently Asked Questions
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </SectionShell>
+
+      {/* SECTION 7 — FINAL CTA BAND */}
+      <SectionShell variant="split" className="pb-16 pt-2">
         <CtaBand
-          title="Ready to Build Real Software?"
-          description="Explore industry-aligned courses, submit hands-on capstone projects, and advance your engineering capabilities with verified feedback."
+          title="Ready to Build Real Digital Skills?"
+          description="Join our next Enugu hybrid cohort or start an online track today—every paid enrolment includes Basic AI 101 and Basic Digital Literacy at zero extra cost."
         />
       </SectionShell>
     </div>

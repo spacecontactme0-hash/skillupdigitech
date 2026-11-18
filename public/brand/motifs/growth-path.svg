@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" width="520" height="300" fill="none" role="img" aria-label="SkillUp Motif 1: The Growth Path">
+  <rect width="520" height="300" rx="20" fill="#231651" />
+  <rect x="36" y="218" width="94" height="30" rx="9" fill="#613399" fill-opacity="0.32" stroke="#B9A6E8" stroke-opacity="0.35" stroke-width="1.25" />
+  <rect x="148" y="168" width="106" height="30" rx="9" fill="#613399" fill-opacity="0.4" stroke="#B9A6E8" stroke-opacity="0.42" stroke-width="1.25" />
+  <rect x="272" y="114" width="114" height="30" rx="9" fill="#613399" fill-opacity="0.48" stroke="#D6FFF6" stroke-opacity="0.4" stroke-width="1.25" />
+  <rect x="398" y="60" width="84" height="30" rx="9" fill="#D6FFF6" fill-opacity="0.2" stroke="#D6FFF6" stroke-opacity="0.7" stroke-width="1.5" />
+  <path d="M24 256H118L164 210H236L288 158H368L428 98H486" stroke="#D6FFF6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M66 276H148L194 230H268L320 178H402L462 118" stroke="#B9A6E8" stroke-width="1.4" stroke-dasharray="5 8" stroke-linecap="round" stroke-opacity="0.4" />
+  <circle cx="164" cy="210" r="5.5" fill="#613399" stroke="#D6FFF6" stroke-width="1.5" />
+  <circle cx="288" cy="158" r="6" fill="#613399" stroke="#D6FFF6" stroke-width="1.75" />
+  <circle cx="486" cy="98" r="14" fill="#D6FFF6" fill-opacity="0.2" />
+  <circle cx="486" cy="98" r="5" fill="#D6FFF6" />
+</svg>

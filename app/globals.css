@@ -4,101 +4,133 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-inter: "Inter", "Segoe UI", sans-serif;
-  --font-plus-jakarta: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  /* SkillUp Digitech Academy — Rebrand V2 Brand Primitives */
+  --brand-russian-violet: #231651;
+  --brand-night-plum: #150C33;
+  --brand-electric-violet: #613399;
+  --brand-mint: #D6FFF6;
+  --brand-emerald: #0A5C4A;
+  --brand-lavender: #E8E3F5;
+  --brand-canvas: #F8FAFB;
 
-  /* Electric Slate & Tech Blue Design System — Light Mode */
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  /* Semantic Surface & Text Tokens — Light Mode */
+  --background: #F8FAFB;
+  --foreground: #150C33;
+  --card: #FFFFFF;
+  --card-foreground: #150C33;
+  --popover: #FFFFFF;
+  --popover-foreground: #150C33;
 
-  --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-  --accent: #0284c7;
-  --accent-foreground: #ffffff;
+  --primary: #231651;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F3EFFA;
+  --secondary-foreground: #231651;
+  --accent: #613399;
+  --accent-foreground: #FFFFFF;
 
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #f1f5f9;
-  --ring: #3b82f6;
+  --muted: #F1EEF8;
+  --muted-foreground: #5A5373;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
 
-  --chart-1: #2563eb;
-  --chart-2: #0284c7;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
-  --chart-5: #8b5cf6;
+  /* Status Semantic Tokens */
+  --success: #0A5C4A;
+  --success-surface: #D6FFF6;
+  --warning: #B45309;
+  --warning-surface: #FEF3C7;
+  --info: #4338CA;
+  --info-surface: #EEF2FF;
 
-  --radius: 0.625rem;
-  --shadow-soft: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
-  --shadow-lifted: 0 12px 32px -4px rgba(15, 23, 42, 0.10);
-  --glow-blue: 0 0 0 3px rgba(59, 130, 246, 0.25);
-  --glow-green: var(--glow-blue);
+  --border: #E8E3F5;
+  --input: #FFFFFF;
+  --ring: #613399;
 
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #3b82f6;
+  /* Data Visualization Palette */
+  --chart-1: #231651;
+  --chart-2: #613399;
+  --chart-3: #0A5C4A;
+  --chart-4: #D97706;
+  --chart-5: #7C3AED;
+
+  /* Radii, Shadows & Focus Glows */
+  --radius: 0.75rem;
+  --shadow-soft: 0 4px 20px -2px rgba(35, 22, 81, 0.06);
+  --shadow-lifted: 0 14px 36px -6px rgba(35, 22, 81, 0.14);
+  --glow-violet: 0 0 0 3px rgba(97, 51, 153, 0.25);
+  --glow-mint: 0 0 0 3px rgba(214, 255, 246, 0.55);
+  --glow-blue: var(--glow-violet);
+  --glow-green: var(--glow-mint);
+
+  /* Sidebar Tokens */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #150C33;
+  --sidebar-primary: #231651;
+  --sidebar-primary-foreground: #D6FFF6;
+  --sidebar-accent: #F3EFFA;
+  --sidebar-accent-foreground: #231651;
+  --sidebar-border: #E8E3F5;
+  --sidebar-ring: #613399;
 }
 
 .dark {
-  /* Electric Slate & Tech Blue Design System — Dark Mode */
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --card: #111827;
-  --card-foreground: #f8fafc;
-  --popover: #111827;
-  --popover-foreground: #f8fafc;
+  /* SkillUp Digitech Academy — Rebrand V2 Dark Mode */
+  --background: #110A29;
+  --foreground: #F8FAFB;
+  --card: #1A103D;
+  --card-foreground: #F8FAFB;
+  --popover: #1A103D;
+  --popover-foreground: #F8FAFB;
 
-  --primary: #3b82f6;
-  --primary-foreground: #020617;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --accent: #38bdf8;
-  --accent-foreground: #031020;
+  --primary: #D6FFF6;
+  --primary-foreground: #150C33;
+  --secondary: #261857;
+  --secondary-foreground: #F8FAFB;
+  --accent: #8B5CF6;
+  --accent-foreground: #FFFFFF;
 
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --destructive: #f87171;
-  --destructive-foreground: #1f1010;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #60a5fa;
+  --muted: #22164D;
+  --muted-foreground: #C4BBE0;
+  --destructive: #F87171;
+  --destructive-foreground: #1F0A0A;
 
-  --chart-1: #3b82f6;
-  --chart-2: #38bdf8;
-  --chart-3: #34d399;
-  --chart-4: #fbbf24;
-  --chart-5: #a78bfa;
+  --success: #6EE7B7;
+  --success-surface: rgba(10, 92, 74, 0.35);
+  --warning: #FBBF24;
+  --warning-surface: rgba(180, 83, 9, 0.3);
+  --info: #A5B4FC;
+  --info-surface: rgba(67, 56, 202, 0.3);
 
-  --glow-blue: 0 0 0 3px rgba(96, 165, 250, 0.35);
-  --glow-green: var(--glow-blue);
+  --border: #31216B;
+  --input: #22164D;
+  --ring: #D6FFF6;
 
-  --sidebar: #0f1523;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #3b82f6;
-  --sidebar-primary-foreground: #020617;
-  --sidebar-accent: #1e293b;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #1e293b;
-  --sidebar-ring: #60a5fa;
+  --chart-1: #D6FFF6;
+  --chart-2: #A78BFA;
+  --chart-3: #34D399;
+  --chart-4: #FBBF24;
+  --chart-5: #C4B5FD;
+
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+  --shadow-lifted: 0 16px 40px -6px rgba(0, 0, 0, 0.5);
+  --glow-violet: 0 0 0 3px rgba(214, 255, 246, 0.35);
+  --glow-mint: 0 0 0 3px rgba(214, 255, 246, 0.45);
+  --glow-blue: var(--glow-violet);
+  --glow-green: var(--glow-mint);
+
+  --sidebar: #150C33;
+  --sidebar-foreground: #F8FAFB;
+  --sidebar-primary: #D6FFF6;
+  --sidebar-primary-foreground: #150C33;
+  --sidebar-accent: #261857;
+  --sidebar-accent-foreground: #F8FAFB;
+  --sidebar-border: #31216B;
+  --sidebar-ring: #D6FFF6;
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), "Inter", sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --font-display: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -137,8 +169,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --shadow-soft: var(--shadow-soft);
   --shadow-lifted: var(--shadow-lifted);
-  --glow-blue: var(--glow-blue);
-  --glow-green: var(--glow-green);
+  --glow-violet: var(--glow-violet);
+  --glow-mint: var(--glow-mint);
+  --glow-blue: var(--glow-violet);
+  --glow-green: var(--glow-mint);
 }
 
 @layer base {
@@ -147,13 +181,15 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   h1,
   h2,
   h3,
   h4 {
-    font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+    font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -164,12 +200,10 @@
     max-width: 1280px;
   }
 
-  /* Full width container for background elements */
   .container-full {
     @apply w-full;
   }
 
-  /* Centered content wrapper */
   .content-wrapper {
     @apply mx-auto w-full px-4 sm:px-6 lg:px-8;
     max-width: 1280px;
@@ -187,12 +221,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+  background: color-mix(in oklab, var(--primary) 28%, transparent);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
+  background: color-mix(in oklab, var(--primary) 48%, transparent);
 }
 
 @keyframes sheen {
@@ -233,8 +267,12 @@
 
 @layer utilities {
   .bg-grain-soft {
-    background-image: radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.04) 1px, transparent 0);
-    background-size: 8px 8px;
+    background-image: radial-gradient(circle at 1px 1px, rgba(35, 22, 81, 0.045) 1px, transparent 0);
+    background-size: 12px 12px;
+  }
+
+  .bg-skillup-hero {
+    background: linear-gradient(135deg, #231651 0%, #150C33 58%, #2B1760 100%);
   }
 
   .marquee-track {
@@ -242,9 +280,10 @@
     animation: marquee 24s linear infinite;
   }
 
+  .focus-violet-glow:focus-visible,
   .focus-blue-glow:focus-visible,
   .focus-green-glow:focus-visible {
-    box-shadow: var(--glow-blue);
+    box-shadow: var(--glow-violet);
   }
 }
 

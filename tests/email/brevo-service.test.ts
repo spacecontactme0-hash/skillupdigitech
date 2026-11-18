@@ -485,7 +485,7 @@ test("22. Persistent notification idempotency generates unique keys and tracks s
   assert.equal(claimResult.record.attempts, 1)
 
   // Status transitions to 'sent' (never 'delivered') upon completion
-  await markNotificationSent(idempotencyKey, { messageId: "msg-123" })
+  await markNotificationSent(idempotencyKey, { providerMessageId: "msg-123" })
   const saved = await getNotificationDispatch(idempotencyKey)
   assert.ok(saved)
   assert.equal(saved.status, "sent")
@@ -561,7 +561,7 @@ test("24. Duplicate notification prevention across independent service instances
     recipientEmail: "student@example.com",
   })
   assert.equal(claimA.claimed, true)
-  await markNotificationSent(instanceKey, { instance: "instance-A" })
+  await markNotificationSent(instanceKey, { metadata: { instance: "instance-A" } })
 
   // Instance B running on another serverless invocation attempts the same notification
   const claimB = await claimNotificationDispatch({
@@ -610,7 +610,7 @@ test("25. Failed notification retry transitions from 'failed' to 'processing'", 
   assert.equal(attempt2.record?.attempts, 2, "Attempts count must increment on retry")
 
   // Successful send on retry
-  await markNotificationSent(retryKey, { messageId: "retry-success-msg" })
+  await markNotificationSent(retryKey, { providerMessageId: "retry-success-msg" })
   const finalRecord = await getNotificationDispatch(retryKey)
   assert.equal(finalRecord?.status, "sent")
 })

@@ -42,6 +42,21 @@ export function ensureEnvironmentLoaded() {
   loadEnvFile(path.resolve(".env"))
 }
 
+export const STANDARD_TECHNOLOGY_CATEGORIES = [
+  "Full-Stack Web Development",
+  "Frontend Engineering",
+  "Backend Engineering",
+  "Mobile Application Development",
+  "Cloud Computing & DevOps",
+  "Data Engineering",
+  "Artificial Intelligence & Machine Learning",
+  "Cybersecurity",
+  "UI/UX & Product Design",
+  "Blockchain & Web3",
+  "Software Engineering Fundamentals",
+  "Programming Languages",
+]
+
 export const APPROVED_MASTER_COURSES = [
   {
     code: "BDL-101",
@@ -259,7 +274,12 @@ export async function runCatalogSeed(options: { dryRun?: boolean } = {}) {
       console.log(` + Initial Hybrid & Online Cohorts would be provisioned`)
       console.log(` + Foundation course bundling mappings would be linked`)
       console.log("\nPass --execute to commit these changes to PostgreSQL.")
-      return
+      return {
+        mode: "dry-run",
+        writesExecuted: false,
+        categoriesToInsert: catsToInsert.length,
+        coursesToInsert: coursesToInsert.length,
+      }
     }
 
     // =========================================================================
@@ -598,12 +618,20 @@ export async function runCatalogSeed(options: { dryRun?: boolean } = {}) {
     console.log("\n" + "=".repeat(70))
     console.log("✓ PHASE 2 SEEDING COMPLETED SUCCESSFULLY IN POSTGRESQL")
     console.log("=".repeat(70))
+    return {
+      mode: "execute",
+      writesExecuted: true,
+      categoriesInserted: catsToInsert.length,
+      coursesInserted: coursesToInsert.length,
+    }
   } catch (err) {
     await pool.query("ROLLBACK;")
     console.error("Seed execution failed, rolled back:", err)
     throw err
   } finally {
-    await closePool()
+    if (require.main === module) {
+      await closePool()
+    }
   }
 }
 

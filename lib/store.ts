@@ -106,8 +106,8 @@ interface PreferencesState {
 export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
-      currency: "USD",
-      currencySelected: false,
+      currency: "NGN",
+      currencySelected: true,
       hydrated: false,
       setCurrency: (currency) => set({ currency }),
       setCurrencySelected: (selected) => set({ currencySelected: selected }),

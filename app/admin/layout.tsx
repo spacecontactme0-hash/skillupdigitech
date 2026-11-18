@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import { BarChart3, BookOpen, CreditCard, MapPinned, Megaphone, Settings, Tags, Users } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { BarChart3, BookOpen, Building2, Calendar, CreditCard, MapPinned, Megaphone, Settings, Tags, Users } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
 import { getRoleHomePath } from "@/lib/role-routing"
 import { clientLogout, makeLogoutGuard } from "@/lib/client-logout"
@@ -13,6 +13,8 @@ import type { DashboardNavItem } from "@/components/skillup/dashboard-nav"
 const adminNavItems: DashboardNavItem[] = [
   { name: "Dashboard", href: "/admin", icon: BarChart3 },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Campuses & Labs", href: "/admin/campuses", icon: Building2 },
+  { name: "Cohorts & Timetables", href: "/admin/cohorts", icon: Calendar },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Categories", href: "/admin/categories", icon: Tags },
   { name: "Users", href: "/admin/users", icon: Users },
@@ -25,6 +27,7 @@ const adminNavItems: DashboardNavItem[] = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, token, setAuth, clearAuth, hydrated } = useAuthStore()
   const logoutGuard = useMemo(() => makeLogoutGuard(), [])
   const [accessVerified, setAccessVerified] = useState(false)
@@ -37,45 +40,56 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const redirectToLogin = () => {
       clearAuth()
-      router.replace("/login?redirect=/admin")
+      const redirectTarget = encodeURIComponent(pathname || "/admin")
+      router.replace(`/login?redirect=${redirectTarget}`)
     }
 
     const verifyAccess = async () => {
-      setAccessVerified(false)
-
-      if (!token) {
-        redirectToLogin()
-        return
-      }
-
       try {
         const res = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : undefined,
         })
 
-        if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
           if (!cancelled) {
+            setAccessVerified(false)
             redirectToLogin()
+          }
+          return
+        }
+
+        if (!res.ok) {
+          // Transient server/database error (e.g., 503): preserve session if already verified admin
+          if (!cancelled && user?.role === "admin" && token) {
+            setAccessVerified(true)
           }
           return
         }
 
         const data = await res.json()
         const currentUser = data?.user
+        const resolvedToken = data?.token || token
 
-        if (!currentUser) {
+        if (!currentUser || !resolvedToken) {
           if (!cancelled) {
+            setAccessVerified(false)
             redirectToLogin()
           }
           return
         }
 
-        setAuth(currentUser, token)
+        if (resolvedToken !== token || currentUser.id !== user?.id || currentUser.role !== user?.role) {
+          setAuth(currentUser, resolvedToken)
+        }
 
         if (currentUser.role !== "admin") {
           if (!cancelled) {
+            setAccessVerified(false)
             router.replace(getRoleHomePath(currentUser.role))
           }
           return
@@ -85,7 +99,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           setAccessVerified(true)
         }
       } catch {
-        if (!cancelled) {
+        if (!cancelled && !(user?.role === "admin" && token)) {
+          setAccessVerified(false)
           redirectToLogin()
         }
       }
@@ -96,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => {
       cancelled = true
     }
-  }, [hydrated, token, setAuth, clearAuth, router, logoutGuard])
+  }, [hydrated, token, user?.id, user?.role, pathname, setAuth, clearAuth, router, logoutGuard])
 
   if (!hydrated || !user || user.role !== "admin" || !accessVerified) return null
 

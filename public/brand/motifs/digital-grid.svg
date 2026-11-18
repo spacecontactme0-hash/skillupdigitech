@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240" fill="none" role="img" aria-label="SkillUp Motif 3: Digital Grid">
+  <defs>
+    <pattern id="g" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" stroke="#231651" stroke-opacity="0.14" stroke-width="1" />
+      <circle cx="0" cy="0" r="1.4" fill="#613399" fill-opacity="0.35" />
+    </pattern>
+  </defs>
+  <rect width="400" height="240" rx="20" fill="#F8FAFB" />
+  <rect width="400" height="240" rx="20" fill="url(#g)" />
+  <rect x="64" y="32" width="32" height="32" rx="4" fill="#613399" fill-opacity="0.16" />
+  <rect x="160" y="64" width="32" height="32" rx="4" fill="#D6FFF6" stroke="#0A5C4A" stroke-opacity="0.3" />
+  <rect x="192" y="64" width="32" height="32" rx="4" fill="#E8E3F5" />
+  <rect x="256" y="128" width="32" height="32" rx="4" fill="#D6FFF6" stroke="#0A5C4A" stroke-opacity="0.3" />
+  <path d="M160 56V72M152 64H168M288 120V136M280 128H296" stroke="#231651" stroke-opacity="0.55" stroke-width="1.5" stroke-linecap="round" />
+</svg>

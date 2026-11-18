@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { SectionShell } from "@/components/skillup/section-shell"
+import { ConnectedThinkingMotif, DigitalGridMotif } from "@/components/brand/motifs"
 import { contactSchema } from "@/lib/validation"
 import { fadeUp, floating, hoverLift, maskReveal, sectionStagger, useReducedMotionSafe } from "@/lib/motion"
 import { Mail, MapPin, MessageCircle, Phone, ShieldCheck, Clock3, CircleCheckBig, Terminal, ArrowRight } from "lucide-react"
@@ -149,14 +150,14 @@ export default function ContactPage() {
         title: "Email Support",
         description: "Send curriculum inquiries, course requests, or account questions.",
         cta: "Send email",
-        href: "mailto:support@technologyacademy.org",
+        href: "mailto:admissions@skillup-digitech.com.ng",
       },
       {
         icon: MapPin,
         title: "Visit Campus",
-        description: "Meet the team and explore our practical computer lab facilities.",
+        description: "Explore our Enugu Learning Centre computer labs and practical facilities.",
         cta: "Get directions",
-        href: "https://maps.google.com/?q=Suite+B16,+Area+11+Shopping+Complex,+Ahmadu+Bello+Way,+Garki+Abuja",
+        href: "https://maps.google.com/?q=14+Garden+Avenue,+GRA,+Enugu,+Enugu+State,+Nigeria",
       },
     ],
     [],
@@ -208,39 +209,32 @@ export default function ContactPage() {
 
   return (
     <div className="flex flex-col">
-      <SectionShell
-        variant="immersive"
-        hasParallax
-        hasFloatingAccent
-        className="relative overflow-hidden border-b border-border/80 bg-gradient-to-br from-[#090D16] via-[#0E1726] to-[#0A192F] py-16 text-white md:py-24"
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-10 [background-image:linear-gradient(to_right,#3b82f6_1px,transparent_1px),linear-gradient(to_bottom,#3b82f6_1px,transparent_1px)] [background-size:28px_28px]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(37,99,235,0.3)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(2,132,199,0.25)_0%,transparent_50%)]" />
+      <section className="relative overflow-hidden border-b border-white/10 bg-skillup-hero py-12 text-white md:py-20">
+        <DigitalGridMotif className="pointer-events-none absolute left-0 top-0 h-56 w-80 text-[#D6FFF6] opacity-25" />
+        <ConnectedThinkingMotif className="pointer-events-none absolute -right-10 bottom-0 h-60 w-96 text-[#B9A6E8] opacity-55" />
 
-        <motion.div variants={sectionStagger} initial="initial" animate="animate" className="relative mx-auto max-w-3xl space-y-5 text-center">
-          <Badge className="border-sky-400/30 bg-sky-500/10 text-sky-300">
-            <Terminal className="mr-1.5 h-3.5 w-3.5" />
-            Admissions & Technical Inquiries
+        <motion.div variants={sectionStagger} initial="initial" animate="animate" className="container relative z-10 mx-auto max-w-3xl space-y-4 text-center">
+          <Badge variant="mint" className="px-4 py-1 text-xs font-bold">
+            <Terminal className="h-3.5 w-3.5" />
+            Admissions &amp; Enugu Campus Inquiries
           </Badge>
           <div className="overflow-hidden">
-            <motion.h1 variants={maskReveal} className="text-4xl font-extrabold tracking-tight md:text-6xl">
+            <motion.h1 variants={maskReveal} className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
               Let&apos;s plan your{" "}
-              <span className="bg-gradient-to-r from-primary via-accent to-sky-400 bg-clip-text text-transparent">
-                next step
-              </span>{" "}
+              <span className="text-[#D6FFF6]">next step</span>{" "}
               in technology.
             </motion.h1>
           </div>
-          <motion.p variants={fadeUp} className="text-base text-slate-300 sm:text-lg">
-            Connect with our curriculum team to identify the right track, review prerequisite requirements, and start your engineering journey.
+          <motion.p variants={fadeUp} className="text-sm leading-relaxed text-[#E8E3F5]/90 sm:text-base">
+            Connect with our academic advisors for teens (13–18) or adult cohorts, BYOL guidance, or an in-person tour at 14 Garden Avenue, GRA, Enugu.
           </motion.p>
-          <motion.p variants={fadeUp} className="text-xs font-mono text-slate-400">
+          <motion.p variants={fadeUp} className="font-mono text-xs text-[#C4BBE0]">
             Admissions responses typically sent within 24 hours on business days.
           </motion.p>
         </motion.div>
-      </SectionShell>
+      </section>
 
-      <SectionShell className="py-14">
+      <SectionShell className="py-10 md:py-14">
         <motion.div variants={sectionStagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {contactOptions.map((option) => (
             <motion.a
@@ -390,25 +384,39 @@ export default function ContactPage() {
           <motion.div variants={fadeUp} className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-soft">
             <iframe
               title={`${academyName} Location Map`}
-              src="https://www.google.com/maps?q=Suite+B16,+Area+11+Shopping+Complex,+Ahmadu+Bello+Way,+Garki+Abuja&output=embed"
+              src="https://www.google.com/maps?q=14+Garden+Avenue,+GRA,+Enugu,+Enugu+State,+Nigeria&output=embed"
               className="h-[320px] w-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </motion.div>
           <motion.div variants={fadeUp} className="space-y-4 rounded-2xl border border-border/80 bg-card/90 p-6 shadow-soft flex flex-col justify-center">
-            <h3 className="text-2xl font-semibold">Campus & Computer Lab</h3>
+            <h3 className="text-2xl font-semibold">Enugu Main Learning Centre</h3>
             <p className="text-muted-foreground text-sm">
-              Suite B16, Area 11 Shopping Complex, Ahmadu Bello Way, Garki Abuja.
+              14 Garden Avenue, GRA, Enugu, Enugu State, Nigeria.
             </p>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1.5 font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                100% Guaranteed Dual-Source Power (Generator + Solar Backup)
+              </p>
+              <p className="flex items-center gap-1.5 font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+                Enterprise High-Speed Fibre Internet Wi-Fi
+              </p>
+              <p className="flex items-center gap-1.5 font-medium text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                Lab 1 (Turing Room) &amp; Lab 2 (Lovelace Room) Workstations
+              </p>
+            </div>
+            <p className="flex items-center gap-2 text-sm text-muted-foreground pt-1">
               <Clock3 className="h-4 w-4 text-accent" />
-              Monday &ndash; Friday: 9:00 AM to 5:00 PM
+              Monday &ndash; Saturday: 9:00 AM to 6:00 PM
             </p>
             <div className="pt-2">
               <Button variant="outline" asChild>
                 <a
-                  href="https://maps.google.com/?q=Suite+B16,+Area+11+Shopping+Complex,+Ahmadu+Bello+Way,+Garki+Abuja"
+                  href="https://maps.google.com/?q=14+Garden+Avenue,+GRA,+Enugu,+Enugu+State,+Nigeria"
                   target="_blank"
                   rel="noreferrer"
                 >

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" width="280" height="64" fill="none" role="img" aria-label="SkillUp Digitech Academy Dark">
+  <defs>
+    <linearGradient id="h-dark-bg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B2380" />
+      <stop offset="100%" stop-color="#231651" />
+    </linearGradient>
+    <linearGradient id="h-dark-mid" x1="16" y1="36" x2="48" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#B9A6E8" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#h-dark-bg)" />
+  <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="15.25" stroke="#D6FFF6" stroke-opacity="0.35" stroke-width="1.5" />
+  <rect x="14" y="41" width="26" height="8.5" rx="4.25" fill="#B9A6E8" />
+  <path d="M35 41L41.5 34.5C43.2 32.8 42 29.8 39.6 29.8H24.4C22 29.8 20.8 26.8 22.5 25.1L29 18.6" stroke="url(#h-dark-mid)" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="24" y="14.5" width="20" height="8.5" rx="4.25" fill="#FFFFFF" />
+  <circle cx="48.5" cy="18.75" r="5" fill="#D6FFF6" />
+  <circle cx="48.5" cy="18.75" r="2.1" fill="#0A5C4A" />
+
+  <text x="76" y="34" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="25" font-weight="800" letter-spacing="-0.03em" fill="#FFFFFF">Skill<tspan fill="#D6FFF6">Up</tspan></text>
+  <text x="77" y="50" font-family="'Inter', system-ui, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.16em" fill="#C4BBE0">DIGITECH ACADEMY</text>
+</svg>

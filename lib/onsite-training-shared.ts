@@ -37,51 +37,55 @@ export const onsiteTrainingConfigSchema = z.object({
 export type OnsiteTrainingConfig = z.infer<typeof onsiteTrainingConfigSchema>
 
 export const DEFAULT_ONSITE_TRAINING_CONFIG: OnsiteTrainingConfig = {
-  formTitle: "Become a World-Class Certified Caregiver in 21 Days",
-  formDescription: "Join SkillUp.",
-  durationDays: 21,
-  hours: 150,
-  registrationFeeNgn: 150000,
-  paymentProviderHint: "Paystack or Flutterwave",
+  formTitle: "Master In-Demand Technology Engineering in Our Physical Labs",
+  formDescription:
+    "Hands-on Saturday coding workshops, high-speed fibre broadband, uninterrupted generator power, and direct mentor code reviews at our Enugu Learning Centre.",
+  durationDays: 180,
+  hours: 240,
+  registrationFeeNgn: 120000,
+  paymentProviderHint: "Paystack or Verified Bank Transfer",
   supportPhone: "09030910091",
   benefits: [
-    "Internationally recognized certification",
-    "Training scrubs and practical materials",
-    "Transcript and recommendation letter",
-    "Internship and career support",
-    "CPR and First Aid certification",
+    "Dedicated lab desk with continuous generator and solar electricity",
+    "High-speed enterprise fibre internet for coding labs and cloud deployments",
+    "1-on-1 weekly code reviews and architecture debugging with senior engineers",
+    "Bring Your Own Laptop (BYOL) hands-on software development setup",
+    "Verified Capstone project portfolio and graduation certification",
   ],
   testimonials: [
     {
-      name: "Ada N.",
-      role: "Caregiver Trainee",
-      quote: "The practical sessions made me job-ready faster than any online-only course I had tried before.",
+      name: "Emeka O.",
+      role: "Junior Software Engineer",
+      quote:
+        "The physical Saturday labs at the Enugu Centre allowed me to debug complex Next.js and PostgreSQL issues directly with instructors. Landing my first software role was smooth.",
     },
     {
-      name: "Michael O.",
-      role: "Health Support Worker",
-      quote: "I joined for the certificate, but the internship support and coaching were the real difference makers.",
+      name: "Chisom K.",
+      role: "AI Solutions Developer",
+      quote:
+        "Having guaranteed electricity and fast fibre internet every Saturday made all the difference in training and fine-tuning local models.",
     },
     {
-      name: "Favour E.",
-      role: "Student Nurse",
-      quote: "The trainers were hands-on, the pace was intense, and I left with real confidence in patient care tasks.",
+      name: "Obinna E.",
+      role: "Growth & Performance Marketer",
+      quote:
+        "Hands-on video editing and ad analytics workshops took my agency portfolio from amateur to high-paying client retainers.",
     },
   ],
   locations: {
     enugu: {
-      label: "Enugu",
-      startsOn: "March 9, 2026",
-      venue: "Prompt Care Academy Enugu Campus",
-      slotsLeft: 18,
-      enrolledCount: 124,
+      label: "Enugu Main Learning Centre",
+      startsOn: "March 7, 2026",
+      venue: "14 Garden Avenue, GRA, Enugu State",
+      slotsLeft: 12,
+      enrolledCount: 48,
     },
     abuja: {
-      label: "Abuja",
-      startsOn: "March 23, 2026",
-      venue: "Prompt Care Academy Abuja Centre",
-      slotsLeft: 11,
-      enrolledCount: 136,
+      label: "Abuja Innovation Hub (Coming Q3)",
+      startsOn: "August 1, 2026",
+      venue: "Central Business District, Abuja",
+      slotsLeft: 30,
+      enrolledCount: 10,
     },
   },
 }

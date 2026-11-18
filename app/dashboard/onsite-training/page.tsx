@@ -155,7 +155,7 @@ export default function DashboardOnsiteTrainingPage() {
               <span className="rounded-full border border-primary/20 bg-background/80 px-3 py-1.5 dark:border-primary/25 dark:bg-background/90">{cohortStatusLabel}</span>
             </div>
             <div className="space-y-3">
-              <h2 className="text-3xl font-semibold leading-tight md:text-4xl">Become a job-ready caregiver with immersive, in-person training.</h2>
+              <h2 className="text-3xl font-semibold leading-tight md:text-4xl">Become an industry-ready technology engineer with immersive, in-person training.</h2>
               <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
                 {config.formDescription} The onsite pathway combines theory, practice, internship support, and certification in one guided intensive.
               </p>
@@ -314,8 +314,8 @@ export default function DashboardOnsiteTrainingPage() {
                 <CardTitle className="text-base">Why learners upgrade</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>Onsite students get immersive practice, trainer feedback, and a more guided transition into real caregiver work.</p>
-                <p>The curriculum is built for speed, confidence, and employability rather than passive watching alone.</p>
+                <p>Onsite hybrid students get immersive hands-on lab practice, mentor code reviews, and direct preparation for technology industry careers.</p>
+                <p>The curriculum is built for practical execution, portfolio building, and job-readiness rather than passive tutorial watching alone.</p>
               </CardContent>
             </Card>
             <Card className="border-primary/15 transition-all duration-200 motion-reduce:transform-none motion-reduce:transition-none hover:-translate-y-0.5 hover:shadow-md">

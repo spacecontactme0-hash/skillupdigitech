@@ -89,13 +89,13 @@ async function main() {
   for (const t of targets) {
     try {
       console.log(`Navigating to ${t.url}...`);
-      await page.goto(t.url, { waitUntil: 'load', timeout: 20000 });
+      await page.goto(t.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.waitForTimeout(3000);
       const filePath = path.join(outDir, `${t.name}.png`);
       await page.screenshot({ path: filePath, fullPage: false });
       console.log(`Saved ${t.name}.png`);
-    } catch (err) {
-      console.error(`Error capturing ${t.name}:`, err.message);
+    } catch (err: any) {
+      console.error(`Error capturing ${t.name}:`, err?.message || err);
     }
   }
 
@@ -104,7 +104,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err: any) => {
   console.error("Fatal:", err);
   process.exit(1);
 });

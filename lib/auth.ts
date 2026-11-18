@@ -70,6 +70,33 @@ export function generateToken(user: User): string {
   return jwt.sign(payload, getJwtSecret(), options)
 }
 
+export function generateGuardianConsentToken(studentEmail: string, guardianEmail: string): string {
+  return jwt.sign(
+    {
+      studentEmail: studentEmail.trim().toLowerCase(),
+      guardianEmail: guardianEmail.trim().toLowerCase(),
+      type: "guardian_consent",
+    },
+    getJwtSecret(),
+    { expiresIn: "14d" }
+  )
+}
+
+export function verifyGuardianConsentToken(token: string): { studentEmail: string; guardianEmail: string } | null {
+  try {
+    const decoded = jwt.verify(token, getJwtSecret()) as any
+    if (decoded && decoded.type === "guardian_consent" && decoded.studentEmail) {
+      return {
+        studentEmail: decoded.studentEmail,
+        guardianEmail: decoded.guardianEmail,
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 
 async function validateUserPassword(user: User, password: string): Promise<boolean> {
   const isHashed = user.password.startsWith("$2a$") || user.password.startsWith("$2b$")
@@ -215,7 +242,16 @@ export const authService = {
     name: string,
     role: "student" | "instructor" | "admin" | "finance" = "student",
     studentProfile?: Omit<StudentRegistrationProfile, "submittedAt">,
-    extraUserFields?: Partial<Pick<User, "bio" | "avatar" | "instructorProfile">>
+    extraUserFields?: Partial<Pick<User, "bio" | "avatar" | "instructorProfile">> & {
+      studentCategory?: "adult" | "minor"
+      dateOfBirth?: Date
+      schoolName?: string
+      guardianName?: string
+      guardianEmail?: string
+      guardianPhone?: string
+      byolAcknowledged?: boolean
+      registrationDraft?: any
+    }
   ): Promise<PendingRegistrationResult> {
     if (role === "admin" || role === "finance") {
       throw new Error("Administrative roles cannot be registered via self-service signup")
@@ -254,6 +290,14 @@ export const authService = {
       bio: extraUserFields?.bio,
       avatar: extraUserFields?.avatar,
       instructorProfile: extraUserFields?.instructorProfile,
+      studentCategory: extraUserFields?.studentCategory || "adult",
+      dateOfBirth: extraUserFields?.dateOfBirth,
+      schoolName: extraUserFields?.schoolName,
+      guardianName: extraUserFields?.guardianName,
+      guardianEmail: extraUserFields?.guardianEmail,
+      guardianPhone: extraUserFields?.guardianPhone,
+      byolAcknowledged: extraUserFields?.byolAcknowledged || false,
+      registrationDraft: extraUserFields?.registrationDraft,
       studentProfile: studentProfile
         ? {
             ...studentProfile,
@@ -306,9 +350,67 @@ export const authService = {
         bio: pendingRegistration.bio,
         instructorProfile: pendingRegistration.instructorProfile,
         studentProfile: pendingRegistration.studentProfile,
+        studentCategory: pendingRegistration.studentCategory ?? "adult",
+        dateOfBirth: pendingRegistration.dateOfBirth,
+        schoolName: pendingRegistration.schoolName,
+        guardianConsentStatus: pendingRegistration.studentCategory === "minor" ? "pending" : "not_applicable",
         emailVerified: true,
         enrolledCourses: [],
       })
+
+      // If registration draft contained an academic programme selection, provision programme enrolment
+      const draft = pendingRegistration.registrationDraft
+      if (draft && draft.programmeCode) {
+        try {
+          const { programmesDb } = await import("./programmes-db")
+          const programme = await programmesDb.getProgrammeByCode(draft.programmeCode)
+          if (programme) {
+            let pathwayId: string | undefined
+            if (draft.pathwayCode) {
+              const pathways = await programmesDb.getPathways(programme.id)
+              const matched = pathways.find((p) => p.code === draft.pathwayCode)
+              pathwayId = matched?.id
+            }
+
+            const cohorts = await programmesDb.getCohorts({
+              programmeId: programme.id,
+              pathwayId,
+              deliveryArrangement: draft.deliveryArrangement,
+            })
+            const defaultCohort = cohorts[0]
+
+            const enrolment = await programmesDb.createProgrammeEnrolment({
+              studentId: user.id,
+              programmeId: programme.id,
+              pathwayId,
+              deliveryArrangement: draft.deliveryArrangement || "online",
+              cohortId: defaultCohort?.id,
+              byolAcknowledged: pendingRegistration.byolAcknowledged,
+              status: "pending_payment",
+              metadata: {
+                draft,
+                courseSlug: draft.courseSlug,
+                schoolName: pendingRegistration.schoolName,
+              },
+            })
+
+            if (pendingRegistration.byolAcknowledged) {
+              await programmesDb.recordPolicyAcknowledgement({
+                userId: user.id,
+                programmeEnrolmentId: enrolment.id,
+                policyType: "byol_policy",
+                policyVersion: "v1.0",
+                metadata: {
+                  deliveryArrangement: draft.deliveryArrangement,
+                  cohortCode: defaultCohort?.code,
+                },
+              })
+            }
+          }
+        } catch (enrolErr) {
+          console.error("Failed to auto-provision programme enrolment on OTP verify:", enrolErr)
+        }
+      }
 
       const pendingPayments = await db.getPaymentsByUserId(pendingRegistration.id)
       for (const payment of pendingPayments) {
@@ -496,26 +598,22 @@ export const authService = {
   },
 
   async getCurrentUser(token: string): Promise<User | null> {
-    try {
-      const db = getDB()
-      const decoded = verifyToken(token)
-      
-      if (!decoded) {
-        return null
-      }
+    const decoded = verifyToken(token)
 
-      const user = await db.findUserById(decoded.userId)
-      
-      if (!user) {
-        return null
-      }
-
-      // Remove password from user object
-      const { password: _, ...userWithoutPassword } = user
-      return userWithoutPassword as User
-    } catch {
+    if (!decoded) {
       return null
     }
+
+    const db = getDB()
+    const user = await db.findUserById(decoded.userId)
+
+    if (!user) {
+      return null
+    }
+
+    // Remove password from user object
+    const { password: _, ...userWithoutPassword } = user
+    return userWithoutPassword as User
   },
 
   decodeToken(token: string): SessionData | null {

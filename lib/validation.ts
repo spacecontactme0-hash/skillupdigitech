@@ -22,10 +22,40 @@ export const studentRegisterSchema = registerBaseSchema
   .extend({
     phoneNumber: z.string().min(7, "Phone number is required"),
     whatsappNumber: z.string().optional().or(z.literal("")),
+    programmeCode: z.enum(["CAREER_READINESS", "SKILL_ACQUISITION"]).optional().default("CAREER_READINESS"),
+    pathwayCode: z.string().optional(),
+    courseSlug: z.string().optional(),
+    deliveryArrangement: z.enum(["online", "hybrid"]).optional().default("online"),
+    byolAcknowledged: z.boolean().optional().default(false),
+    studentCategory: z.enum(["adult", "minor"]).optional().default("adult"),
+    dateOfBirth: z.string().optional(),
+    schoolName: z.string().optional(),
+    gradeLevel: z.string().optional(),
+    guardianName: z.string().optional(),
+    guardianEmail: z.string().optional().or(z.literal("")),
+    guardianPhone: z.string().optional().or(z.literal("")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
+  })
+  .refine((data) => {
+    if (data.deliveryArrangement === "hybrid" && !data.byolAcknowledged) {
+      return false
+    }
+    return true
+  }, {
+    message: "You must acknowledge the Bring Your Own Laptop (BYOL) requirement for hybrid learning.",
+    path: ["byolAcknowledged"],
+  })
+  .refine((data) => {
+    if (data.studentCategory === "minor") {
+      return Boolean(data.guardianName?.trim() && data.guardianEmail?.trim())
+    }
+    return true
+  }, {
+    message: "Parent or guardian name and contact email are required for students under 18.",
+    path: ["guardianName"],
   })
 
 export const registerSchema = studentRegisterSchema

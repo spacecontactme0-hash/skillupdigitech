@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getAcademyName } from "@/lib/brand-config"
 import { useAuthStore } from "@/lib/store"
+import { useToast } from "@/hooks/use-toast"
 import type { Certificate, Enrollment } from "@/lib/types"
 
 type CertificateWithCourse = Certificate & {
@@ -21,36 +22,77 @@ type CertificateWithCourse = Certificate & {
 }
 
 export default function CertificatesPage() {
+  const { toast } = useToast()
   const { user, token } = useAuthStore()
   const [certificates, setCertificates] = useState<CertificateWithCourse[]>([])
   const [enrollments, setEnrollments] = useState<(Enrollment & { course?: { id: string; title: string; slug: string } })[]>([])
   const [loading, setLoading] = useState(true)
+  const [requestingCourseId, setRequestingCourseId] = useState<string | null>(null)
+
+  const loadData = async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      const [certificatesRes, enrollmentsRes] = await Promise.all([
+        fetch("/api/certificates", { headers: { Authorization: `Bearer ${token || ""}` } }),
+        fetch(`/api/enrollments?userId=${user.id}`, { headers: { Authorization: `Bearer ${token || ""}` } }),
+      ])
+
+      const certificatesData = certificatesRes.ok ? await certificatesRes.json() : { certificates: [] }
+      const enrollmentsData = enrollmentsRes.ok ? await enrollmentsRes.json() : { enrollments: [] }
+
+      setCertificates(certificatesData.certificates || [])
+      setEnrollments(enrollmentsData.enrollments || [])
+    } catch (error) {
+      console.error("Failed to load certificates page:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    if (!user) return
-
-    const load = async () => {
-      setLoading(true)
-      try {
-        const [certificatesRes, enrollmentsRes] = await Promise.all([
-          fetch("/api/certificates", { headers: { Authorization: `Bearer ${token || ""}` } }),
-          fetch(`/api/enrollments?userId=${user.id}`, { headers: { Authorization: `Bearer ${token || ""}` } }),
-        ])
-
-        const certificatesData = certificatesRes.ok ? await certificatesRes.json() : { certificates: [] }
-        const enrollmentsData = enrollmentsRes.ok ? await enrollmentsRes.json() : { enrollments: [] }
-
-        setCertificates(certificatesData.certificates || [])
-        setEnrollments(enrollmentsData.enrollments || [])
-      } catch (error) {
-        console.error("Failed to load certificates page:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    void load()
+    void loadData()
   }, [token, user])
+
+  const handleClaimCertificate = async (courseId: string) => {
+    setRequestingCourseId(courseId)
+    try {
+      const res = await fetch("/api/certificates/issue", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token || ""}`,
+        },
+        body: JSON.stringify({ courseId }),
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.cleared) {
+        const issues = data.missingRequirements?.join(" ") || data.error || "Clearance requirements not met."
+        toast({
+          title: "Clearance Incomplete",
+          description: issues,
+          variant: "destructive",
+        })
+        return
+      }
+
+      toast({
+        title: "Certificate Issued!",
+        description: "Your verified credential has been officially generated and registered.",
+      })
+
+      void loadData()
+    } catch (err: any) {
+      toast({
+        title: "Clearance Evaluation Failed",
+        description: err.message,
+        variant: "destructive",
+      })
+    } finally {
+      setRequestingCourseId(null)
+    }
+  }
 
   const completedWithoutCertificate = useMemo(() => {
     const certificateCourseIds = new Set(certificates.map((certificate) => certificate.courseId))
@@ -175,17 +217,23 @@ export default function CertificatesPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-1">
-                  <Button asChild size="sm" className="gap-1.5">
+                  <Button asChild size="sm" className="gap-1.5 bg-[#231651] hover:bg-[#150C33] text-white">
+                    <Link href={`/verify/${certificate.verificationCode}`}>
+                      <ShieldCheck className="h-4 w-4" />
+                      Verify Credential
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="gap-1.5">
                     <a href={certificate.certificateUrl} target="_blank" rel="noreferrer">
                       <Download className="h-4 w-4" />
-                      Download Credential
+                      Download Diploma
                     </a>
                   </Button>
                   {certificate.course?.slug ? (
-                    <Button asChild variant="outline" size="sm" className="gap-1.5">
+                    <Button asChild variant="ghost" size="sm" className="gap-1.5">
                       <Link href={`/courses/${certificate.course.slug}`}>
                         <ExternalLink className="h-4 w-4" />
-                        View Course
+                        Course Details
                       </Link>
                     </Button>
                   ) : null}
@@ -225,19 +273,29 @@ export default function CertificatesPage() {
               Completed Courses Awaiting Final Accreditation
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             {completedWithoutCertificate.map((enrollment) => (
               <div
                 key={enrollment.id}
-                className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-3 text-sm"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 p-4 text-sm"
               >
                 <div>
-                  <p className="font-medium text-foreground">{enrollment.course?.title || enrollment.courseId}</p>
-                  <p className="text-xs text-muted-foreground">All lessons finished (100% progress)</p>
+                  <p className="font-bold text-[#231651]">{enrollment.course?.title || enrollment.courseId}</p>
+                  <p className="text-xs text-muted-foreground">All lessons finished (100% progress). Graduation clearance required.</p>
                 </div>
-                <Badge variant="outline" className="border-amber-300 text-amber-600 dark:text-amber-400">
-                  Pending Review
-                </Badge>
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <Badge variant="outline" className="border-amber-300 text-amber-600 dark:text-amber-400">
+                    Pending Clearance
+                  </Badge>
+                  <Button
+                    size="sm"
+                    className="bg-[#231651] hover:bg-[#150C33] text-white text-xs h-8"
+                    disabled={requestingCourseId === enrollment.courseId}
+                    onClick={() => handleClaimCertificate(enrollment.courseId)}
+                  >
+                    {requestingCourseId === enrollment.courseId ? "Evaluating..." : "Claim Certificate"}
+                  </Button>
+                </div>
               </div>
             ))}
           </CardContent>
